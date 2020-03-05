@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'nw*izblra*u&-==vn_2c)83tf%$g2%@q43us1ql2w_a+1ywz55'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'home',
     'serverChat',
     'authenticate',
+    'tictactoe',
 ]
 
 MIDDLEWARE = [
