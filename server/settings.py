@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'serverChat',
     'authenticate',
     'tictactoe',
+    'crispy_forms'
 ]
 
 MIDDLEWARE = [
@@ -122,3 +123,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+LOGIN_REDIRECT_URL="tictactoe_home"
+LOGOUT_REDIRECT_URL="tictactoe_welcome"
+LOGIN_URL="tictactoe_login"
+
+CRISPY_TEMPLATE_PACK='bootstrap3'
