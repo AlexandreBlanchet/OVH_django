@@ -41,8 +41,10 @@ def accept_invitation(request, id):
     if request.method == 'POST':
         if "accept" in request.POST:
             game = Game.objects.create(first_player=invitation.to_user, second_player=invitation.from_user)
+            invitation.delete()
+            return redirect(game)
         invitation.delete()
-        return redirect(game)
+        return redirect('tictactoe_home')
     else :
         return render(request, "tictactoe/accept_invitation_form.html", {'invitation': invitation})
 

@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
 {% block  content%}
-    <h2 class="text-primary" >Welcome, {{ user.username}} </h2>
     <div class="row">
         <div class="col-md-6">
             <h3>Actives games</h3>
             
             {% include "tictactoe/game_list_snippet.html" with games_list=active_games %}
+            <p></p>
             <h3>Finished games</h3>
             
             {% include "tictactoe/game_list_snippet.html" with games_list=finished_games %}
@@ -19,7 +19,7 @@
             </p>
         </div>
         <div class="col-md-6">
-            <h3>Actives games</h3>
+            <h3>Games requests</h3>
             {% if invitations %}
                 <div class="list-group">
                     {% for inv in invitations %}

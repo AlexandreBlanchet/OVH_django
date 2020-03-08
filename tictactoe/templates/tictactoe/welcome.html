@@ -9,11 +9,13 @@ Welcome
     <div class="jumbotron">
         <div class="container">
             <h1>Welcome to my Tictactoe Game !</h1>
+            <p></p>
             <img
                 src="{% static 'img/tictactoe.PNG' %}"
-                height="300px" 
-                width="300px" 
+                height="250px" 
+                width="250px" 
             />
+            <a role="button" class="btn btn-success ml-md-5" href=" {% url 'tictactoe_login' %}">Login</a>
         </div>
     </div>
 
