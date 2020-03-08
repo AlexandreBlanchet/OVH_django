@@ -13,7 +13,17 @@
                     {% else %}
                         -- You lost
                     {% endif %}
+                
+                {% else %}
+                {% if game.status == 'F' and user == game.first_player %}
+                    -- It's your turn !
+                {% elif game.status == 'S' and user == game.second_player %}
+                    -- It's your turn !
                 {% endif %}
+                
+                
+                {% endif %}
+                
                 <span class="badge badge-primary badge-pill">{{ game.move_set.count }}</span>
             </a>
         {% endfor %}
