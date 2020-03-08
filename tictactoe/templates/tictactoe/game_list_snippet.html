@@ -1,7 +1,7 @@
 {% if games_list %}
-    <div class="list-group bg-info">
+    <div class="list-group">
         {% for game in games_list %}
-            <a class="list-group-item list-group-item-info" href=" {{ game.get_absolute_url }}">
+            <a class="list-group-item list-group-item-action  d-flex justify-content-between align-items-center" href=" {{ game.get_absolute_url }}">
                 {{ game }}
                 {% if game.status not in 'FS' %}
                     {% if game.status == 'D' %}
@@ -14,7 +14,7 @@
                         -- You lost
                     {% endif %}
                 {% endif %}
-                <span class="badge">{{ game.move_set.count }}</span>
+                <span class="badge badge-primary badge-pill">{{ game.move_set.count }}</span>
             </a>
         {% endfor %}
     </div>
