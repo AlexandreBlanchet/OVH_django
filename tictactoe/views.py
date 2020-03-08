@@ -25,12 +25,12 @@ def welcome(request):
 def new_invitation(request):
     if request.method == "POST":
         invitation = Invitation(from_user=request.user)
-        form = InvitationForm(instance=invitation, data=request.POST)
+        form = InvitationForm(request.user, instance=invitation, data=request.POST)
         if form.is_valid():
             form.save()
             return redirect('tictactoe_home')
     else:
-        form = InvitationForm()
+        form = InvitationForm(request.user)
     return render(request, "tictactoe/new_invitation_form.html", {'form':form})
 
 @login_required

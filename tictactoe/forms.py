@@ -1,11 +1,14 @@
 from django.forms import ModelForm
-from .models import Invitation, Move
+from .models import Invitation, Move, User
 from django.core.exceptions import ValidationError
 
 class InvitationForm(ModelForm):
     class Meta:
         model = Invitation
         exclude = ('from_user', 'timestamp')
+    def __init__(self, from_user, *args, **kwargs):
+        super(InvitationForm, self).__init__(*args, **kwargs)
+        self.fields['to_user'].queryset = User.objects.exclude(pk=from_user.id)
 
 
 class MoveForm(ModelForm):
