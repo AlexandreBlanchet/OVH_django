@@ -54,10 +54,10 @@ class Game(models.Model):
     def _get_game_status_after_move(self, move):
         x, y = move.x, move.y
         board = self.board()
-        if (board[y][0] == board[y][1] == board[y][2]) or  \
-            (board[0][x] == board[1][x] == board[2][x]) or \
-            (board[0][0] == board[1][1] == board[2][2]) or \
-            (board[0][2] == board[1][1] == board[2][0]) :
+        if (board[y][0] == board[y][1] == board[y][2] != None) or  \
+            (board[0][x] == board[1][x] == board[2][x] != None) or \
+            (board[0][0] == board[1][1] == board[2][2] != None) or \
+            (board[0][2] == board[1][1] == board[2][0] != None) :
             return 'W' if move.by_first_player else 'L'
         if self.move_set.count() >= BOARD_SIZE**2:
             return 'D'

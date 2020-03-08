@@ -34,6 +34,7 @@
           {% if user.is_authenticated %}
             <li><a href=" {% url 'tictactoe_logout' %}">Logout</a></li>
           {% else %}
+            <li><a href=" {% url 'tictactoe_signup' %}">Sign up</a></li>
             <li><a href=" {% url 'tictactoe_login' %}">Login</a></li>
           {% endif %}
         </ul>
