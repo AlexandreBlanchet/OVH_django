@@ -7,7 +7,7 @@
 
 {% block content %}
 
-    <form role="form" action="{% url 'tictactoe_login' %}" method="post">
+    <form role="form" action="{% url 'authenticate_login' %}" method="post">
         {% csrf_token %}
         <p> Please login. </p>
         {{ form | crispy }}

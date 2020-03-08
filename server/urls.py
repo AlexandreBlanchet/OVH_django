@@ -21,5 +21,6 @@ urlpatterns = [
     path('', include('home.urls')),
     path('serverChat/', include('serverChat.urls')),
     path('tictactoe/', include('tictactoe.urls')),
+    path('keepinmind/', include('keepinmind.urls')),
     path('login/', include('authenticate.urls')),
 ]

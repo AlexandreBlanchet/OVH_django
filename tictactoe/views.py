@@ -4,10 +4,9 @@ from .models import Game, Invitation
 from django.contrib.auth.decorators import login_required
 from .forms import InvitationForm, MoveForm
 from django.views.generic import ListView, CreateView
-from django.contrib.auth.forms import UserCreationForm
-from django.urls import reverse_lazy 
 
-@login_required
+
+@login_required()
 def home(request):
     my_games = Game.objects.games_for_user(request.user)
     active_games = my_games.active()
@@ -21,7 +20,7 @@ def welcome(request):
     else:
         return render(request, 'tictactoe/welcome.html')
 
-@login_required
+@login_required()
 def new_invitation(request):
     if request.method == "POST":
         invitation = Invitation(from_user=request.user)
@@ -33,7 +32,7 @@ def new_invitation(request):
         form = InvitationForm(request.user)
     return render(request, "tictactoe/new_invitation_form.html", {'form':form})
 
-@login_required
+@login_required()
 def accept_invitation(request, id):
     invitation = get_object_or_404(Invitation, pk=id)
     if not request.user == invitation.to_user:
@@ -49,7 +48,7 @@ def accept_invitation(request, id):
         return render(request, "tictactoe/accept_invitation_form.html", {'invitation': invitation})
 
 
-@login_required
+@login_required()
 def game_detail(request, id):
     game = get_object_or_404(Game, pk=id)
     context = {'game': game}
@@ -57,7 +56,7 @@ def game_detail(request, id):
         context['form'] = MoveForm()
     return render(request, "tictactoe/game_details.html", context)
 
-@login_required
+@login_required()
 def make_move(request, id):
     game = get_object_or_404(Game, pk=id)
     if not game.is_users_move(request.user):
@@ -72,8 +71,3 @@ def make_move(request, id):
 
 class AllGamesList(ListView):
     model = Game
-
-class SignUpView(CreateView):
-    form_class = UserCreationForm
-    template_name = 'tictactoe/signup_form.html'
-    success_url = reverse_lazy('tictactoe_home')

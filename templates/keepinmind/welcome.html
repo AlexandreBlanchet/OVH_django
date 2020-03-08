@@ -1,20 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}
+{% block titile %}
 Welcome
-{% endblock title %}
+{% endblock titile %}
 
 {% block content %}
     <div class="jumbotron">
         <div class="container">
-            <h1>Welcome to my Tictactoe Game !</h1>
-            <p></p>
-            <img
-                src="{% static 'img/tictactoe.PNG' %}"
-                height="250px" 
-                width="250px" 
-            />
+            <h1>Welcome to my KeepInMind App !</h1>
             <p></p>
             <a role="button" class="btn btn-success" href=" {% url 'authenticate_login' %}">Login</a>
         </div>

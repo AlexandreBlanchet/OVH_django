@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'serverChat',
     'authenticate',
     'tictactoe',
-    'crispy_forms'
+    'keepinmind',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -128,6 +129,6 @@ STATIC_ROOT = "/var/www/server/static/"
 
 LOGIN_REDIRECT_URL="tictactoe_home"
 LOGOUT_REDIRECT_URL="tictactoe_welcome"
-LOGIN_URL="tictactoe_login"
+LOGIN_URL="authenticate_login"
 
 CRISPY_TEMPLATE_PACK='bootstrap3'

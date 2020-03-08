@@ -6,7 +6,7 @@
 {% endblock title %}
 
 {% block content %}
-    <form role="form" action=" {% url 'tictactoe_signup' %}" method="post">
+    <form role="form" action=" {% url 'authenticate_signup' %}" method="post">
         {% csrf_token %}
         <p>Please fill in the form below to create an account.</p>
 
