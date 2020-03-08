@@ -71,6 +71,13 @@
         <div class="col-md-4 card">
             <div class="card-body">
                 <h3>It's your move</h3>
+                You're the 
+                 {% if game.first_player == user %}
+                    X
+                {% else %}
+                    O
+                {% endif %}
+                 player
                 <form method="post" action=" {% url 'tictactoe_make_move' game.id %}">
                     {{ form | crispy }}
                     {% csrf_token %}
