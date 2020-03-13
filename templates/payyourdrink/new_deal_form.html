@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    New Invitation
+{% endblock title %}
+
+{% block content %}
+    <form method="post" action="{% url 'payyourdrink_new_deal' %}">
+        {{form | crispy }}
+
+        {% csrf_token %}
+        <button class="btn btn-primary" type="submit">Add the person</button>
+    </form>
+{% endblock content %}
+

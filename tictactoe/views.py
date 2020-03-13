@@ -12,13 +12,13 @@ def home(request):
     active_games = my_games.active()
     finished_games = my_games.difference(active_games)
     invitations = request.user.invitations_received.all()
-    return render(request, "tictactoe/home.html", {'active_games': active_games, 'finished_games':finished_games,'invitations':invitations})
+    return render(request, "tictactoe/home.html", {'active_games': active_games, 'finished_games':finished_games,'invitations':invitations, 'app':'tictactoe', 'appname':'Morpion'})
 
 def welcome(request):
     if request.user.is_authenticated:
         return redirect('tictactoe_home')
     else:
-        return render(request, 'tictactoe/welcome.html')
+        return render(request, 'tictactoe/welcome.html', {'app':'tictactoe', 'appname':'Morpion'})
 
 @login_required()
 def new_invitation(request):

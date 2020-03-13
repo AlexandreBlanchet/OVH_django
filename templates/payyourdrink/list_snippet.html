@@ -1,0 +1,16 @@
+{% if deal_list %}
+    <div class="list-group">
+        {% for deal in deal_list %}
+            <span class="list-group-item  d-flex justify-content-between align-items-center" >
+                {{ deal.second_person }}
+                <div>
+                <a style="color: green;" class="fas fa-plus fa-1x" href="{{ deal.add_drink }}"></a>
+                <span class="badge badge-primary badge-pill mr-3 ml-3">{{deal.number_of_drinks}}</span>
+                <a style="color: red;" class="fas fa-minus fa-1x" href="{{ deal.remove_drink }}"></a>
+                </div>
+            </span>
+        {% endfor %}
+    </div>
+{% else %}
+    <p> No deal to display </p>
+{% endif %}

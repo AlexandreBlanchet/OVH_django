@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titile %}
+Welcome
+{% endblock titile %}
+
+{% block content %}
+    <div class="jumbotron">
+        <div class="container">
+            <h1>Welcome to my PayYourDrink App !</h1>
+            <p></p>
+            <a role="button" class="btn btn-success" href=" {% url 'authenticate_login' %}">Login</a>
+        </div>
+    </div>
+
+{% endblock content %}

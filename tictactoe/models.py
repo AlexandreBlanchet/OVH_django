@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.urls import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-GMAE_STATUS_CHOICES = (
+GAME_STATUS_CHOICES = (
     ('F', 'First player to move'),
     ('S', 'Second player to move'),
     ('W', 'First player wins'),
@@ -28,7 +28,7 @@ class Game(models.Model):
     second_player = models.ForeignKey(User, related_name="games_second_player", on_delete=models.SET_NULL, null=True)
     start_time = models.DateTimeField(auto_now_add=True)
     last_active = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=1, default='F', choices=GMAE_STATUS_CHOICES)
+    status = models.CharField(max_length=1, default='F', choices=GAME_STATUS_CHOICES)
 
     objects = GamesQuerySet.as_manager()
 

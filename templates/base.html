@@ -17,7 +17,12 @@
   </head>
   <body>
     <nav class="navbar navbar-dark bg-dark">
-        <a class="navbar-brand" href="/tictactoe">Tictactoe</a>
+        <div>
+        <a class="navbar-brand" href="/">Home</a>
+        {% if app %}
+          <a class="navbar-brand" href="/{{app}}">{{appname}}</a>
+        {% endif %}
+        </div>
         <div class="nav d-flex flex-row-reverse">
               {% if user.is_authenticated %}
                 <a role="button" class="btn btn-outline-success ml-md-3" href=" {% url 'authenticate_logout' %}">Logout</a>

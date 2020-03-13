@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'authenticate',
     'tictactoe',
     'keepinmind',
+    'payyourdrink',
     'crispy_forms',
 ]
 
@@ -128,7 +129,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = "/var/www/server/static/"
 
 LOGIN_REDIRECT_URL="tictactoe_home"
-LOGOUT_REDIRECT_URL="tictactoe_welcome"
+LOGOUT_REDIRECT_URL="home_home"
 LOGIN_URL="authenticate_login"
 
 CRISPY_TEMPLATE_PACK='bootstrap3'
