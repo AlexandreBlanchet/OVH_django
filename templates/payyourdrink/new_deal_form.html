@@ -11,6 +11,8 @@
 
         {% csrf_token %}
         <button class="btn btn-primary" type="submit">Add the person</button>
+        <a class="btn btn-secondary" href="{% url 'payyourdrink_home' %}"> Return </a>
     </form>
+    
 {% endblock content %}
 

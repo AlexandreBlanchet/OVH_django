@@ -1,8 +1,11 @@
 from django.conf.urls import url
-from .views import welcome, home, new_deal
+from .views import welcome, home, new_deal, deal_detail, change_deal
 
 urlpatterns = [
     url(r'^$', welcome, name="payyourdrink_welcome"),
     url(r'^home$', home, name="payyourdrink_home"),
     url(r'^new_deal$', new_deal, name="payyourdrink_new_deal"),
+    url(r'detail/(?P<id>\d+)/$', deal_detail, name="payyourdrink_detail"),
+    url(r'change_deal/(?P<id>\d+)/$', change_deal, name="payyourdrink_change_deal"),
+
 ]

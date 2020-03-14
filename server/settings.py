@@ -128,7 +128,7 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = "/var/www/server/static/"
 
-LOGIN_REDIRECT_URL="tictactoe_home"
+LOGIN_REDIRECT_URL="home_home"
 LOGOUT_REDIRECT_URL="home_home"
 LOGIN_URL="authenticate_login"
 

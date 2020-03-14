@@ -74,7 +74,6 @@ class Move(models.Model):
     x = models.IntegerField(validators=[MinValueValidator(0),MaxValueValidator(BOARD_SIZE-1)])
     y = models.IntegerField(validators=[MinValueValidator(0),MaxValueValidator(BOARD_SIZE-1)])
     comment = models.CharField(max_length=300, blank=True)
-    by_first_player = models.BooleanField()
     game = models.ForeignKey(Game, editable=False, on_delete=models.CASCADE)
     by_first_player = models.BooleanField(editable=False)
 

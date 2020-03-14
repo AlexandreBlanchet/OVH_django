@@ -8,4 +8,10 @@ class NewDealForm(ModelForm):
         fields = ['second_person']
     def __init__(self, first_person, *args, **kwargs):
         super(NewDealForm, self).__init__(*args, **kwargs)
-        self.fields['second_person'].queryset = User.objects.exclude(pk=first_person.id)
+        deals = Deal.objects.deals_for_user(first_person)
+        userIds = set()
+        for deal in deals :
+            userIds.add(deal.first_person.id)
+            userIds.add(deal.second_person.id)
+
+        self.fields['second_person'].queryset = User.objects.exclude(pk__in=userIds)
