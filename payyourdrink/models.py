@@ -4,10 +4,11 @@ from django.urls import reverse
 from django.db.models import Q
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-DEAL_STATUS = (
-    ('F', 'Drinks for the first person'),
-    ('S', 'Drinks for the second person'),
-    ('N', 'No drink for either'),
+DRINK_TYPE = (
+    ('D', 'Drink'),
+    ('W', 'Wine'),
+    ('B', 'Beer'),
+    ('C', 'Cocktail'),
 )
 
 class DealsQuerySet(models.QuerySet):
@@ -16,20 +17,38 @@ class DealsQuerySet(models.QuerySet):
             Q(first_person=user) | Q(second_person=user)
         )
 
-    def get_drinks(self, user):
-        return self.filter((Q(status='F') & Q(first_person=user)) | (Q(status='S') & Q(second_person=user)))
+    def drinks_for_user(self, user):
+        total = 0
+        deals = self.filter(Q(first_person=user))
+        for deal in deals:
+            nb_drinks = deal.get_number_of_drinks()
+            if nb_drinks > 0 :
+                total+=nb_drinks
+        deals = self.filter(Q(second_person=user))
+        for deal in deals:
+            nb_drinks = deal.get_number_of_drinks_inverse()
+            if nb_drinks > 0 :
+                total+=nb_drinks
+        return total
 
-    def give_drinks(self, user):
-        return self.filter((Q(status='S') & Q(first_person=user)) | (Q(status='F') & Q(second_person=user)))
-
-    def others(self):
-        return self.filter(Q(status='N'))
+    def drinks_from_user(self, user):
+        total = 0
+        deals = self.filter(Q(first_person=user))
+        for deal in deals:
+            nb_drinks = deal.get_number_of_drinks_inverse()
+            if nb_drinks > 0 :
+                total+=nb_drinks
+        deals = self.filter(Q(second_person=user))
+        for deal in deals:
+            nb_drinks = deal.get_number_of_drinkse()
+            if nb_drinks > 0 :
+                total+=nb_drinks
+        return total
         
 class Deal(models.Model):
     first_person = models.ForeignKey(User, related_name="first_person", on_delete=models.SET_NULL, null=True)
     second_person = models.ForeignKey(User, related_name="second_person", on_delete=models.SET_NULL, null=True, verbose_name="User to add",
         help_text="Please select the user you want to add in your list",)
-    status = models.CharField(max_length=1, default='N', choices=DEAL_STATUS)
     start_time = models.DateTimeField(auto_now_add=True)
     last_active = models.DateTimeField(auto_now=True)
 
@@ -46,13 +65,11 @@ class Deal(models.Model):
     def get_number_of_drinks_inverse(self):
         return - sum([ -1 if drink.for_first_person else 1 for drink in self.drink_set.all()])
 
-    def update_after_drink(self):
-        if self.get_number_of_drinks() == 0 :
-            self.status = 'N'
-        elif self.get_number_of_drinks() > 0 :
-            self.status = 'F'
-        else :
-            self.status = 'S'
+    def get_total_drinks(self):
+        return self.drink_set.count()
+
+    def get_drinks(self):
+        return self.drink_set.all().order_by("-id")
 
     def get_absolute_url(self):
         return reverse("payyourdrink_detail", args=[self.pk])
@@ -67,7 +84,3 @@ class Drink(models.Model):
     start_time = models.DateTimeField(auto_now_add=True)
     by_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
-    def save(self, *args, **kwargs):
-        super(Drink, self).save(*args, **kwargs)
-        self.deal.update_after_drink()
-        self.deal.save()

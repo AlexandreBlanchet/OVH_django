@@ -1,29 +1,140 @@
 {% if deal_list %}
     <div class="list-group">
         {% for deal in deal_list %}
-            <a class="list-group-item list-group-item-action  d-flex justify-content-between align-items-center" href=" {{ deal.get_absolute_url }}">
-                {% if user.id == deal.first_person.id %}
-                {{ deal.second_person }}
-                {% if deal.get_number_of_drinks > 0  %}
-                    <span class="badge badge-primary badge-pill mr-3 ml-3">{{deal.get_number_of_drinks}}</span>
-                {% endif %}
-                {% if deal.get_number_of_drinks_inverse > 0  %}
-                    <span class="badge badge-primary badge-pill mr-3 ml-3">{{deal.get_number_of_drinks_inverse}}</span>
-                {% endif %}
-                {% else %}
-                {{ deal.first_person }}
-                {% if deal.get_number_of_drinks > 0  %}
-                    <span class="badge badge-primary badge-pill mr-3 ml-3">{{deal.get_number_of_drinks}}</span>
-                {% endif %}
-                {% if deal.get_number_of_drinks_inverse > 0  %}
-                    <span class="badge badge-primary badge-pill mr-3 ml-3">{{deal.get_number_of_drinks_inverse}}</span>
-                {% endif %}
-                {% endif %}
-                
-                
-            </a>
+            <div class="card">
+                <a class="card-header list-group-item-action" href="#multiCollapseExample{{deal.id}}" data-toggle="collapse" aria-expanded="false" aria-controls="multiCollapseExample{{deal.id}}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <i class="far fa-user"></i>
+                            {% if user.id == deal.first_person.id %}
+                                <h4> {{ deal.second_person }} </h4>
+                            {% else %}
+                                <h4> {{ deal.first_person }} </h4>
+                            {% endif %}
+                            
+                        </div>
+                        <div class="col-md-6" >
+                            <h4 style="padding-top:25px">
+                                {% if user.id == deal.first_person.id %}
+                                    {% if deal.get_number_of_drinks == 0  %}
+                                        Status is even with {{deal.second_person}}
+                                    {% elif deal.get_number_of_drinks > 0 %}
+                                        Owes you {{deal.get_number_of_drinks}} drinks
+                                    {% else %}
+                                        You owe {{deal.get_number_of_drinks_inverse}} drinks
+                                    {% endif %}
+                                {% else %}
+                                    {% if deal.get_number_of_drinks == 0  %}
+                                        Status is even with {{deal.first_person}}
+                                    {% elif deal.get_number_of_drinks < 0 %}
+                                        Owes you {{deal.get_number_of_drinks_inverse}} drinks
+                                    {% else %}
+                                        You owe {{deal.get_number_of_drinks}} drinks
+                                    {% endif %}
+                                {% endif %}
+                            </h4>
+                        </div>
+                    </div>
+                </a>
+                <div class="collapse multi-collapse" id="multiCollapseExample{{deal.id}}">
+                    <div class="card-body">
+                        <h5 class="card-title">Details</h5>
+                        <p class="card-text">You have already exchanged {{deal.get_total_drinks}} drinks</p>
+                        
+                        <a href="#multiCollapsePay{{deal.id}}" class="btn btn-primary"  data-toggle="collapse" aria-expanded="false" aria-controls="multiCollapsePay{{deal.id}}">Pay a drink</a>
+                        <a href="#multiCollapseGet{{deal.id}}" class="btn btn-primary"  data-toggle="collapse" aria-expanded="false" aria-controls="multiCollapseGet{{deal.id}}">Get a drink</a>
+                        <a href="#multiCollapseHistory{{deal.id}}" class="btn btn-primary float-right"  data-toggle="collapse" aria-expanded="false" aria-controls="multiCollapseHistory{{deal.id}}">History</a>
+                        
+                        <p></p>
+                            <div  id="accordionExample{{deal.id}}">
+                                <div id="multiCollapsePay{{deal.id}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample{{deal.id}}">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">If you owe a drink to
+                                                {% if user.id == deal.first_person.id %}
+                                                     {{ deal.second_person }} 
+                                                {% else %}
+                                                     {{ deal.first_person }} 
+                                                {% endif %}
+                                            </h5>
+                                           <form method="post" action=" {% url 'payyourdrink_change_deal' deal.id %}">
+                                                {% csrf_token %}
+                                            
+                                                <div>
+                                                <label class="mt-3" >Add a comment</label>
+                                                <textarea class="form-control" name="comment" rows="3"></textarea>
+                                                </div>
+                                                <div class="mt-3">
+                                                <button class="btn btn-success" type="submit" name="give">Pay</button>
+                                                <a href="#multiCollapsePay{{deal.id}}" class="btn btn-primary"  data-toggle="collapse" aria-expanded="false" aria-controls="multiCollapsePay{{deal.id}}">Cancel</a>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="multiCollapseGet{{deal.id}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample{{deal.id}}">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">If 
+                                                {% if user.id == deal.first_person.id %}
+                                                     {{ deal.second_person }} 
+                                                {% else %}
+                                                     {{ deal.first_person }} 
+                                                {% endif %}
+                                                owes you a drink
+                                            </h5>
+                                            <form method="post" action=" {% url 'payyourdrink_change_deal' deal.id %}">
+                                                {% csrf_token %}
+                                            
+                                                <div>
+                                                <label class="mt-3" >Add a comment</label>
+                                                <textarea class="form-control" name="comment" rows="3"></textarea>
+                                                </div>
+                                                <div class="mt-3">
+                                                <button class="btn btn-success" type="submit" name="get">Get</button>
+                                                <a href="#multiCollapseGet{{deal.id}}" class="btn btn-primary"  data-toggle="collapse" aria-expanded="false" aria-controls="multiCollapseGet{{deal.id}}">Cancel</a>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="multiCollapseHistory{{deal.id}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample{{deal.id}}">
+                                    <div class="card overflow-auto" style="max-height:360px">
+                                            {% if deal.get_drinks %}
+                                                {% for drink in deal.get_drinks %}
+                                                    <div class="card mb-12">
+                                                        <div class="card-header"><i class="fas fa-glass-martini-alt"></i></div>
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">
+                                                                {% if user.id == deal.first_person.id %}
+                                                                    {% if drink.for_first_person %}
+                                                                        {{deal.second_person}} gave you a drink
+                                                                    {% else %}
+                                                                        You gave a drink to {{deal.second_person}}
+                                                                    {% endif %}
+                                                                {% else %}
+                                                                    {% if drink.for_first_person %}
+                                                                        {{deal.first_person}} gave you a drink
+                                                                    {% else %}
+                                                                        You gave a drink to {{deal.first_person}}
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            </h5>
+                                                            <p class="card-text"> {{drink.comment}} </p>
+                                                            <p class="card-text"><small class="text-muted"> {{drink.start_time}} by {{drink.by_user}} </small></p>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <p> No history </p>
+                                            {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         {% endfor %}
     </div>
-{% else %}
-    <p> No deal to display </p>
 {% endif %}

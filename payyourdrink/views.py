@@ -9,15 +9,14 @@ def welcome(request):
     if request.user.is_authenticated:
         return redirect('payyourdrink_home')
     else:
-        return render(request, 'payyourdrink/welcome.html', {'app':'payyourdrink', 'appname':'Paye ton verre !'})
+        return render(request, 'payyourdrink/welcome.html', {'app':'payyourdrink', 'appname':'Have a drink !'})
 
 @login_required()
 def home(request):
     my_deals = Deal.objects.deals_for_user(request.user)
-    drinks_user_get = my_deals.get_drinks(request.user)
-    drinks_user_give = my_deals.give_drinks(request.user)
-    others_deals = my_deals.others()
-    return render(request, "payyourdrink/home.html", {'drinks_user_get': drinks_user_get, 'drinks_user_give':drinks_user_give, 'others_deals':others_deals, 'app':'payyourdrink', 'appname':' Paye ton verre !'})
+    total_drinks_to_get = Deal.objects.drinks_for_user(request.user)
+    total_drinks_to_give = Deal.objects.drinks_from_user(request.user)
+    return render(request, "payyourdrink/home.html", {'deals': my_deals, 'total_drinks_to_get':total_drinks_to_get,'total_drinks_to_give':total_drinks_to_give, 'app':'payyourdrink', 'appname':'Have a drink !'})
 
 @login_required()
 def new_deal(request):
@@ -31,11 +30,6 @@ def new_deal(request):
         form = NewDealForm(request.user)
     return render(request, "payyourdrink/new_deal_form.html", {'form':form})
    
-@login_required()
-def deal_detail(request, id):
-    deal = get_object_or_404(Deal, pk=id)
-    return render(request, "payyourdrink/deal_details.html", {'deal': deal})
-
 
 @login_required()
 def change_deal(request, id):
@@ -51,5 +45,4 @@ def change_deal(request, id):
     if request.POST.get('get') is not None :
         drink.for_first_person = request.user.id == drink.deal.first_person.id
         drink.save()
-    return render(request, "payyourdrink/deal_details.html", {'deal': deal})
-    #return redirect('payyourdrink_home')
+    return redirect('payyourdrink_home')
