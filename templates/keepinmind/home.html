@@ -2,6 +2,44 @@
 
 {% block  content%}
     
-    This is the home page for keep in mind 
-
+    <div class="jumbotron">
+        <h1 class="display-4">Hello</h1>
+        <p class="lead">Try to remember !</p>
+        <hr class="my-4">
+        
+        <p>You have curently {{notes.count}} notes </p>
+        <p>You have curently {{all_notes}} notes </p>
+        <div class="d-flex flex-row-reverse">
+            <a class="btn btn-primary btn-lg" href="{% url 'keepinmind_edit_note' id=0  %}" role="button">Add a note</a>
+        </div>
+    </div>
+    <div class="row">
+    {% for note in notes %}
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                     <form method="post" action="{% url 'keepinmind_edit_note' id=note.id %}">
+                        Seen {{note.score}} times
+                        {% csrf_token %}
+                        <div class="float-right">
+                            <button type="submit" name="ok">
+                                <i style="color: green;" class="fas fa-check fa-2x" ></i>
+                            </button>
+                            <button class="ml-3" type="submit" name="ko">
+                                <i style="color: red;" class="fas fa-times fa-2x" ></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <p class="card-text"> {{note.question}} </p>
+                    {% if note.is_question %}
+                        <a href="#" class="btn btn-primary">Show Answer</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+              
 {% endblock  %}

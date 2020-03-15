@@ -8,7 +8,9 @@
         <hr class="my-4">
         <p>You have a total of {{total_drinks_to_get}} drinks to get </p>
         <p>You have a total of {{total_drinks_to_give}} drinks to give </p>
-        <a class="btn btn-primary btn-lg float-right" href="{% url 'payyourdrink_new_deal' %}" role="button">Add a person</a>
+        <div class="d-flex flex-row-reverse">
+        <a class="btn btn-primary btn-lg" href="{% url 'payyourdrink_new_deal' %}" role="button">Add a person</a>
+        </div>
     </div>
     {% include "payyourdrink/list_snippet.html" with deal_list=deals %}
               

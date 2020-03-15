@@ -46,7 +46,7 @@
                         <a href="#multiCollapseHistory{{deal.id}}" class="btn btn-primary float-right"  data-toggle="collapse" aria-expanded="false" aria-controls="multiCollapseHistory{{deal.id}}">History</a>
                         
                         <p></p>
-                            <div  id="accordionExample{{deal.id}}">
+                            <div class="accordion" id="accordionExample{{deal.id}}">
                                 <div id="multiCollapsePay{{deal.id}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample{{deal.id}}">
                                     <div class="card">
                                         <div class="card-body">
@@ -66,7 +66,7 @@
                                                 </div>
                                                 <div class="mt-3">
                                                 <button class="btn btn-success" type="submit" name="give">Pay</button>
-                                                <a href="#multiCollapsePay{{deal.id}}" class="btn btn-primary"  data-toggle="collapse" aria-expanded="false" aria-controls="multiCollapsePay{{deal.id}}">Cancel</a>
+                                                <a data-target="#multiCollapsePay{{deal.id}}"  class="btn btn-primary"  data-toggle="collapse" aria-expanded="false" aria-controls="multiCollapsePay{{deal.id}}">Cancel</a>
                                                 </div>
                                             </form>
                                         </div>
