@@ -10,6 +10,7 @@ class NewDealForm(ModelForm):
         super(NewDealForm, self).__init__(*args, **kwargs)
         deals = Deal.objects.deals_for_user(first_person)
         userIds = set()
+        userIds.add(first_person.id)
         for deal in deals :
             userIds.add(deal.first_person.id)
             userIds.add(deal.second_person.id)
