@@ -13,7 +13,7 @@ def welcome(request):
 def home(request):
     user_notes = Note.objects.notes_of_user(request.user)
     for note in user_notes:
-        if ((datetime.now().timestamp() - note.last_active.timestamp())//3600)> note.status*2 :
+        if ((datetime.now().timestamp() - note.last_active.timestamp())//3600)> note.status*10 :
             note.seen = False
             note.save()
     all_notes = user_notes.count()

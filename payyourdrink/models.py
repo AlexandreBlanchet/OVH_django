@@ -40,7 +40,7 @@ class DealsQuerySet(models.QuerySet):
                 total+=nb_drinks
         deals = self.filter(Q(second_person=user))
         for deal in deals:
-            nb_drinks = deal.get_number_of_drinkse()
+            nb_drinks = deal.get_number_of_drinks()
             if nb_drinks > 0 :
                 total+=nb_drinks
         return total
