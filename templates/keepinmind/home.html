@@ -5,6 +5,7 @@
     <div class="jumbotron">
         <hr>
         <p>You have curently {{notes.count}} notes to see for a total of {{all_notes}} notes </p>
+        <p>Use the <i style="color: green;" class="fas fa-check fa-lg" ></i> if you remember the note otherwise use  <i style="color: red;" class="fas fa-times fa-lg" ></i>
         <div class="d-flex flex-row-reverse">
             <a class="btn btn-primary btn-lg" href="{% url 'keepinmind_edit_note' id=0  %}" role="button">Add a note</a>
         </div>

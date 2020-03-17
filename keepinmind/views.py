@@ -26,7 +26,7 @@ def edit_note(request, id):
         note = Note(user=request.user)
     elif id == '1'  :
         notes_fact_list = Note.objects.notes_fact_list()    
-        return render(request, "keepinmind/new_note_form.html", {'notes_fact_list':notes_fact_list})
+        return render(request, "keepinmind/new_note_form.html", {'notes_fact_list':notes_fact_list, 'app':'keepinmind', 'appname':'Keep in mind !', 'footer':"You'll soon have a great mind..."})
     else :
         note = get_object_or_404(Note, pk=id)
     if request.method == "POST":
@@ -54,5 +54,5 @@ def edit_note(request, id):
             note.question = request.POST.get('question')
             note.save()
             return redirect('keepinmind_home')
-    return render(request, "keepinmind/new_note_form.html", {'note':note})
+    return render(request, "keepinmind/new_note_form.html", {'note':note, 'app':'keepinmind', 'appname':'Keep in mind !', 'footer':"You'll soon have a great mind..."})
 
