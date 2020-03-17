@@ -35,6 +35,7 @@ def edit_note(request, id):
             return redirect('keepinmind_home')
         if request.POST.get('fact') is not None:
             note.pk = None
+            note.user = request.user
             note.save()
             return redirect('keepinmind_home')
         if request.POST.get('ok') is not None or request.POST.get('ko') is not None:
