@@ -39,10 +39,10 @@ def change_deal(request, id):
     drink = deal.new_drink(request.user)
     if request.POST.get('comment') is not None :
         drink.comment = request.POST.get('comment')
-    if request.POST.get('give') is not None :
+    if request.POST.get('get') is not None :
         drink.for_first_person = request.user.id != drink.deal.first_person.id
         drink.save()
-    if request.POST.get('get') is not None :
+    if request.POST.get('give') is not None :
         drink.for_first_person = request.user.id == drink.deal.first_person.id
         drink.save()
     return redirect('payyourdrink_home')

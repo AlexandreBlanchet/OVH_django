@@ -50,7 +50,7 @@
                                 <div id="multiCollapsePay{{deal.id}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample{{deal.id}}">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h5 class="card-title">If you owe a drink to
+                                            <h5 class="card-title">You will owe a drink to
                                                 {% if user.id == deal.first_person.id %}
                                                      {{ deal.second_person }} 
                                                 {% else %}
@@ -75,13 +75,13 @@
                                 <div id="multiCollapseGet{{deal.id}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample{{deal.id}}">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h5 class="card-title">If 
+                                            <h5 class="card-title"> 
                                                 {% if user.id == deal.first_person.id %}
                                                      {{ deal.second_person }} 
                                                 {% else %}
                                                      {{ deal.first_person }} 
                                                 {% endif %}
-                                                owes you a drink
+                                                will owe you a drink
                                             </h5>
                                             <form method="post" action=" {% url 'payyourdrink_change_deal' deal.id %}">
                                                 {% csrf_token %}
