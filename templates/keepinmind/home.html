@@ -3,12 +3,8 @@
 {% block  content%}
     
     <div class="jumbotron">
-        <h1 class="display-4">Hello</h1>
-        <p class="lead">Try to remember !</p>
-        <hr class="my-4">
-        
-        <p>You have curently {{notes.count}} notes </p>
-        <p>You have curently {{all_notes}} notes </p>
+        <hr>
+        <p>You have curently {{notes.count}} notes to see for a total of {{all_notes}} notes </p>
         <div class="d-flex flex-row-reverse">
             <a class="btn btn-primary btn-lg" href="{% url 'keepinmind_edit_note' id=0  %}" role="button">Add a note</a>
         </div>
@@ -18,24 +14,58 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                     <form method="post" action="{% url 'keepinmind_edit_note' id=note.id %}">
-                        Seen {{note.score}} times
+                     <form method="post" action="{{ note.get_absolute_url }}">
+                        Seen {{note.score}} times. Last seen {{note.last_active}}
                         {% csrf_token %}
                         <div class="float-right">
-                            <button type="submit" name="ok">
-                                <i style="color: green;" class="fas fa-check fa-2x" ></i>
+                            <button class="btn" type="submit" name="ok">
+                                <i style="color: green;" class="fas fa-check fa-lg" ></i>
                             </button>
-                            <button class="ml-3" type="submit" name="ko">
-                                <i style="color: red;" class="fas fa-times fa-2x" ></i>
+                            <button class="btn ml-3" type="submit" name="ko">
+                                <i style="color: red;" class="fas fa-times fa-lg" ></i>
                             </button>
                         </div>
                     </form>
                 </div>
                 <div class="card-body">
-                    <p class="card-text"> {{note.question}} </p>
+                    <a href="{{note.get_absolute_url}}" class="btn float-right"> <i class="fas fa-pencil-alt"></i> </a>
                     {% if note.is_question %}
-                        <a href="#" class="btn btn-primary">Show Answer</a>
+                        <div class="card card-body">
+                            <p class="card-text"> 
+                                {% if note.get_is_question_first %}
+                                    {{note.question}} 
+                                {% else %}
+                                    {{note.answer}}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <p></p>
+                        <a class="btn btn-primary" data-toggle="collapse" href="#collapseAnswer{{note.id}}" role="button" aria-expanded="false" aria-controls="collapseAnswer{{note.id}}">
+                            {% if note.get_is_question_first %}
+                                    Show Answer
+                                {% else %}
+                                    Show Question
+                                {% endif %}
+
+                        </a>
+                        <p></p>
+                        <div class="collapse" id="collapseAnswer{{note.id}}">
+                        <div class="card card-body">
+                            <p class="card-text"> 
+                             {% if note.get_is_question_first %}
+                                    {{note.answer}} 
+                                {% else %}
+                                    {{note.question}}
+                                {% endif %}
+                            </p>
+                        </div>
+                        </div>
+                    {% else %}
+                        <div class="card card-body">
+                            <p class="card-text"> {{note.question}} </p>
+                        </div>
                     {% endif %}
+                    
                 </div>
             </div>
         </div>

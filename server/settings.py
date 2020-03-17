@@ -133,3 +133,6 @@ LOGOUT_REDIRECT_URL="home_home"
 LOGIN_URL="authenticate_login"
 
 CRISPY_TEMPLATE_PACK='bootstrap3'
+
+
+FACT_USERNAME='ablanche'

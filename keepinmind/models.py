@@ -2,14 +2,16 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db.models import Q
-from datetime import datetime;
+from django.conf import settings
 
 
 class NotesQuerySet(models.QuerySet):
     def notes_of_user(self, user):
-        return self.filter(
-            Q(user=user) 
-        )
+        return self.filter(Q(user=user))
+
+    def notes_fact_list(self):
+        user = User.objects.get(username=settings.FACT_USERNAME)
+        return self.filter(Q(user=user))
 
     def active(self):
         return self.filter(Q(seen=False))
@@ -28,4 +30,10 @@ class Note(models.Model):
     objects = NotesQuerySet.as_manager()
 
     def get_absolute_url(self):
-        return reverse("edit_note", args=[self.pk])
+        if self.pk is None :
+            return reverse("keepinmind_edit_note", args=[0])
+        return reverse("keepinmind_edit_note", args=[self.pk])
+        
+
+    def get_is_question_first(self):
+        return self.score%2 == 0

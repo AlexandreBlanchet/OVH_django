@@ -5,32 +5,67 @@
 {% endblock title %}
 
 {% block content %}
-<div class="card">
-  <div class="card-body">
-    <h5 class="card-title">Write down a note or a question</h5>
-    <form method="post" action="{% url 'keepinmind_edit_note' id=note_id %}">
-        {% csrf_token %}
-        <textarea class="form-control" name="question" rows="3" >{{note.question}}</textarea>
-        <p></p>
-        {% if note.is_question %}
-            <textarea class="form-control" name="answer" rows="3">{{note.answer}}</textarea>
-        {% else %}
-            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-            Add an answer
-            </button>
-            <p></p>
-            <div class="collapse" id="collapseExample">
-                <textarea class="form-control" name="answer" rows="3">{{note.answer}}</textarea>
-            </div>
-        {% endif %}
+    <div class="jumbotron">
+        <h3> Add a new note</h3>
+        <hr>
+        <p>Here you can add a note or a question / answer you would like to keep in your mind </p>
+        <p>If you need some inspiration you can learn some random fact as well</p>
+        <div class="d-flex flex-row-reverse">
+            {% if note %}
+                <a class="btn btn-primary btn-lg" href="{% url 'keepinmind_edit_note' id=1 %}" role="button">Choose an existing fact !</a>
+            {% else %}
+                <a class="btn btn-primary btn-lg" href="{% url 'keepinmind_edit_note' id=0 %}" role="button">Create new</a>
+            {% endif %}
+        </div>
+    </div>
+    {% if notes_fact_list %}
+        {% for note in notes_fact_list %}
+        <div class="card card-body">
+            
+             {% if note.is_question %}
+                <h5> Question : </h5> 
+                <p>{{note.question}}</p>
+                <h5> Answer : </h5>
+                    <p>{{note.answer}}</p>
+                {% else %}
+                <h5> Note : </h5>
+                    <p> {{note.question}} </p>
+            {% endif %}
+            <form method="post" action="{{ note.get_absolute_url }}">
+                {% csrf_token %}
+                <button class="btn btn-primary float-right" type="submit" name="fact">Choose</button>
+            </form>
+        </div>
+        {% endfor %}
+        <a role="button" class="btn btn-danger mt-3 mb-3 ml-3" href=" {% url 'keepinmind_home' %}">Cancel</a>
+    {% else %}
+        <div class="card card-body">
+            <h5 class="card-title">Write down a note or a question</h5>
+            <form method="post" action="{{ note.get_absolute_url }}">
+                {% csrf_token %}
+                <textarea class="form-control" name="question" rows="5" >{{note.question}}</textarea>
+                <p></p>
+                {% if note.is_question %}
+                    <textarea class="form-control" name="answer" rows="3">{{note.answer}}</textarea>
+                {% else %}
+                    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                    Add an answer
+                    </button>
+                    <p></p>
+                    <div class="collapse" id="collapseExample">
+                        <textarea class="form-control" name="answer" rows="3">{{note.answer}}</textarea>
+                    </div>
+                {% endif %}
 
-        <p></p>
-        <button class="btn btn-success" type="submit">Save</button>
-        <a role="button" class="btn btn-danger" href=" {% url 'keepinmind_home' %}">Cancel</a>
-    </form>
+                <p></p>
+                <button class="btn btn-success" type="submit">Save</button>
+                <a role="button" class="btn btn-primary" href=" {% url 'keepinmind_home' %}">Cancel</a>
+                <button class="btn btn-danger" type="submit" name="delete">Delete</button>
+            </form>
+        </div>
     
-  </div>
-</div>
+    {% endif %}
+
     
 {% endblock content %}
 

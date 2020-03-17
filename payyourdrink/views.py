@@ -9,14 +9,14 @@ def welcome(request):
     if request.user.is_authenticated:
         return redirect('payyourdrink_home')
     else:
-        return render(request, 'payyourdrink/welcome.html', {'app':'payyourdrink', 'appname':'Have a drink !'})
+        return render(request, 'payyourdrink/welcome.html', {'app':'payyourdrink', 'appname':'Have a drink !', 'footer':"It's always a pleasure to have a drink..."})
 
 @login_required()
 def home(request):
     my_deals = Deal.objects.deals_for_user(request.user)
     total_drinks_to_get = Deal.objects.drinks_for_user(request.user)
     total_drinks_to_give = Deal.objects.drinks_from_user(request.user)
-    return render(request, "payyourdrink/home.html", {'deals': my_deals, 'total_drinks_to_get':total_drinks_to_get,'total_drinks_to_give':total_drinks_to_give, 'app':'payyourdrink', 'appname':'Have a drink !'})
+    return render(request, "payyourdrink/home.html", {'deals': my_deals, 'total_drinks_to_get':total_drinks_to_get,'total_drinks_to_give':total_drinks_to_give, 'app':'payyourdrink', 'appname':'Have a drink !', 'footer':"It's always a pleasure to have a drink..."})
 
 @login_required()
 def new_deal(request):
