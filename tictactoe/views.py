@@ -4,7 +4,9 @@ from .models import Game, Invitation
 from django.contrib.auth.decorators import login_required
 from .forms import InvitationForm, MoveForm
 from django.views.generic import ListView, CreateView
+from django.http import HttpResponse
 
+import json
 
 @login_required()
 def home(request):
@@ -67,7 +69,8 @@ def make_move(request, id):
         move.save()
         return redirect('tictactoe_detail', id)
     else:
-        return render(request, 'tictactoe/game_details.html', {'game':game, 'form':form})
+        # return render(request, 'tictactoe/game_details.html', {'game':game, 'form':form})
+        return HttpResponse(status=403)
 
 class AllGamesList(ListView):
     model = Game

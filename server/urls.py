@@ -24,4 +24,5 @@ urlpatterns = [
     path('keepinmind/', include('keepinmind.urls')),
     path('payyourdrink/', include('payyourdrink.urls')),
     path('login/', include('authenticate.urls')),
+    path('testajax/', include('test_ajax.urls')),
 ]

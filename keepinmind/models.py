@@ -34,6 +34,8 @@ class Note(models.Model):
             return reverse("keepinmind_edit_note", args=[0])
         return reverse("keepinmind_edit_note", args=[self.pk])
         
+    def is_owner(self, user):
+        return self.user == user
 
     def get_is_question_first(self):
         return self.score%2 == 0

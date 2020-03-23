@@ -5,7 +5,6 @@
 {% block title %}
     {{ game }}
 {% endblock title %}
-
 {% block styling %}
     {{ block.super }}
     <style type="text/css">
@@ -51,7 +50,7 @@
             {% for row in game.board %}
                 <tr>
                     {% for move in row %}
-                        <td class="tictactoe-cell">
+                        <td class="tictactoe-cell" onclick="make_move({{game.id}},{{forloop.counter0}},{{forloop.parentloop.counter0}})">
                             {% if move %}
                                 {% if move.by_first_player %}
                                     X
@@ -62,7 +61,7 @@
                         </td>
                     {% endfor %}
                 </tr>
-            {% endfor %}
+            {% endfor %} 
         </table>
         </div>
     </div>
@@ -91,6 +90,5 @@
         </div>
     {% endif %}
     </div>
-
-
+    <script src="{% static 'scripts/main.js' %}"></script>
 {% endblock content %}

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Note
 from datetime import datetime
+from django.core.exceptions import PermissionDenied
 
 def welcome(request):
     if request.user.is_authenticated:
@@ -29,6 +30,8 @@ def edit_note(request, id):
         return render(request, "keepinmind/new_note_form.html", {'notes_fact_list':notes_fact_list, 'app':'keepinmind', 'appname':'Keep in mind !', 'footer':"You'll soon have a great mind..."})
     else :
         note = get_object_or_404(Note, pk=id)
+        if not note.is_owner(request.user):
+            raise PermissionDenied
     if request.method == "POST":
         if request.POST.get('delete') is not None:
             note.delete()

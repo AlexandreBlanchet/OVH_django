@@ -1,4 +1,5 @@
 {% if deal_list %}
+
     <div class="list-group">
         {% for deal in deal_list %}
             <div class="card">
@@ -13,24 +14,21 @@
                             {% endif %}
                             
                         </div>
-                        <div class="col-md-6" >
+                        <div class="col-md-3" >
                             <h4 style="padding-top:25px">
                                 {% if user.id == deal.first_person.id %}
-                                    {% if deal.get_number_of_drinks == 0  %}
-                                        Status is even with {{deal.second_person}}
-                                    {% elif deal.get_number_of_drinks > 0 %}
-                                        Owes you {{deal.get_number_of_drinks}} drinks
-                                    {% else %}
-                                        You owe {{deal.get_number_of_drinks_inverse}} drinks
-                                    {% endif %}
+                                    Owes you {{deal.get_number_of_drinks_for_first_person}} drinks
                                 {% else %}
-                                    {% if deal.get_number_of_drinks == 0  %}
-                                        Status is even with {{deal.first_person}}
-                                    {% elif deal.get_number_of_drinks < 0 %}
-                                        Owes you {{deal.get_number_of_drinks_inverse}} drinks
-                                    {% else %}
-                                        You owe {{deal.get_number_of_drinks}} drinks
-                                    {% endif %}
+                                    Owes you {{deal.get_number_of_drinks_for_second_person}} drinks
+                                {% endif %}
+                            </h4>
+                        </div>
+                        <div class="col-md-3" >
+                            <h4 style="padding-top:25px">
+                                {% if user.id == deal.first_person.id %}
+                                    You owe {{deal.get_number_of_drinks_for_second_person}} drinks
+                                {% else %}
+                                    You owe {{deal.get_number_of_drinks_for_first_person}} drinks
                                 {% endif %}
                             </h4>
                         </div>
@@ -121,7 +119,18 @@
                                                                 {% endif %}
                                                             </h5>
                                                             <p class="card-text"> {{drink.comment}} </p>
-                                                            <p class="card-text"><small class="text-muted"> {{drink.start_time}} by {{drink.by_user}} </small></p>
+                                                            <p class="card-text"><small class="text-muted">asked at {{drink.start_time}} by {{drink.by_user}} </small></p>
+                                                            {% if drink.paid_time %}
+                                                                <p class="card-text"><small class="text-muted">Paid at {{drink.paid_time}} </small></p>
+                                                            {% else %}
+                                                                <p class="card-text"><small class="text-muted">Not paid yet</small></p>
+                                                                <form method="post" action=" {% url 'payyourdrink_drink' drink.id %}">
+                                                                    {% csrf_token %}
+                                                        
+                                                                    <button class="btn btn-success float-right" type="submit" name="paid">Mark as paid</button>
+                                                                </form>
+                                                            {% endif %}
+
                                                         </div>
                                                     </div>
                                                 {% endfor %}

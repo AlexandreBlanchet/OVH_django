@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'keepinmind',
     'payyourdrink',
     'crispy_forms',
+    'test_ajax',
 ]
 
 MIDDLEWARE = [

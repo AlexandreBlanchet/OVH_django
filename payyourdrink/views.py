@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Deal
+from .models import Deal, Drink
 from .forms import NewDealForm
 from django.core.exceptions import PermissionDenied
 
@@ -42,7 +42,19 @@ def change_deal(request, id):
     if request.POST.get('get') is not None :
         drink.for_first_person = request.user.id != drink.deal.first_person.id
         drink.save()
-    if request.POST.get('give') is not None :
+    elif request.POST.get('give') is not None :
         drink.for_first_person = request.user.id == drink.deal.first_person.id
         drink.save()
+    elif request.POST.get('paid') is not None :
+        drink.set_paid_time()
+        drink.save()
+    return redirect('payyourdrink_home')
+
+@login_required()
+def update_drink(request, id):
+    drink = get_object_or_404(Drink, pk=id)
+    if not drink.deal.is_in_the_deal(request.user):
+        raise PermissionDenied
+    drink.set_paid_time()
+    drink.save()
     return redirect('payyourdrink_home')

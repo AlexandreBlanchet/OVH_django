@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db.models import Q
 from django.core.validators import MaxValueValidator, MinValueValidator
+from datetime import datetime
+
 
 DRINK_TYPE = (
     ('D', 'Drink'),
@@ -21,28 +23,20 @@ class DealsQuerySet(models.QuerySet):
         total = 0
         deals = self.filter(Q(first_person=user))
         for deal in deals:
-            nb_drinks = deal.get_number_of_drinks()
-            if nb_drinks > 0 :
-                total+=nb_drinks
+            total += deal.get_number_of_drinks_for_first_person()
         deals = self.filter(Q(second_person=user))
         for deal in deals:
-            nb_drinks = deal.get_number_of_drinks_inverse()
-            if nb_drinks > 0 :
-                total+=nb_drinks
+            total += deal.get_number_of_drinks_for_second_person()
         return total
 
     def drinks_from_user(self, user):
         total = 0
         deals = self.filter(Q(first_person=user))
         for deal in deals:
-            nb_drinks = deal.get_number_of_drinks_inverse()
-            if nb_drinks > 0 :
-                total+=nb_drinks
+            total += deal.get_number_of_drinks_for_second_person()
         deals = self.filter(Q(second_person=user))
         for deal in deals:
-            nb_drinks = deal.get_number_of_drinks()
-            if nb_drinks > 0 :
-                total+=nb_drinks
+            total += deal.get_number_of_drinks_for_first_person()
         return total
         
 class Deal(models.Model):
@@ -60,10 +54,11 @@ class Deal(models.Model):
     def new_drink(self, user):
         return Drink(deal=self, by_user=user)
 
-    def get_number_of_drinks(self):
-        return sum([ -1 if drink.for_first_person else 1 for drink in self.drink_set.all()])
-    def get_number_of_drinks_inverse(self):
-        return - sum([ -1 if drink.for_first_person else 1 for drink in self.drink_set.all()])
+    def get_number_of_drinks_for_first_person(self):
+        return sum([ 1 for drink in self.drink_set.all() if drink.for_first_person and not drink.paid_time])
+
+    def get_number_of_drinks_for_second_person(self):
+        return sum([ 1 for drink in self.drink_set.all() if not drink.for_first_person and not drink.paid_time])
 
     def get_total_drinks(self):
         return self.drink_set.count()
@@ -71,9 +66,6 @@ class Deal(models.Model):
     def get_drinks(self):
         return self.drink_set.all().order_by("-id")
 
-    def get_absolute_url(self):
-        return reverse("payyourdrink_detail", args=[self.pk])
-    
     def __str__(self):
         return f"{self.first_person} vs {self.second_person}"
 
@@ -83,4 +75,9 @@ class Drink(models.Model):
     comment = models.CharField(max_length=300, blank=True)
     start_time = models.DateTimeField(auto_now_add=True)
     by_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    paid_time = models.DateTimeField(null = True)
 
+    def set_paid_time(self):
+        self.paid_time = datetime.now()
+
+    
