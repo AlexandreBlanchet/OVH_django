@@ -65,30 +65,21 @@
         </table>
         </div>
     </div>
-
+    <div class="col-md-4">
+    <div class="card card-body ">
     {% if form %}
-        <div class="col-md-4 card">
-            <div class="card-body">
-                <h3>It's your move</h3>
-                You're the 
-                 {% if game.first_player == user %}
-                    X
-                {% else %}
-                    O
-                {% endif %}
-                 player
-                <form method="post" action=" {% url 'tictactoe_make_move' game.id %}">
-                    {{ form | crispy }}
-                    {% csrf_token %}
-                    <button class="btn btn-success" type="submit">Make move</button>
-                </form>
-            </div>
-        </div>
-    {% else %}
-        <div class="col-md-4">
-        <a class="btn btn-primary m-3" href=" {% url 'tictactoe_home' %}">Go back home</a>
-        </div>
+    
+        <h3>It's your turn to play !</h3>
+        {% else %}
+        
+        <h3>You've already played wait for your opponent to play :)</h3>
+        
     {% endif %}
+    </div>
+    </div>
+     <div class="col-md-4">
+            <a class="btn btn-primary m-3" href=" {% url 'tictactoe_home' %}">Go back home</a>
+        </div>
     </div>
     <script src="{% static 'scripts/main.js' %}"></script>
 {% endblock content %}
