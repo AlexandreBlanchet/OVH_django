@@ -23,6 +23,7 @@ urlpatterns = [
     path('tictactoe/', include('tictactoe.urls')),
     path('keepinmind/', include('keepinmind.urls')),
     path('payyourdrink/', include('payyourdrink.urls')),
+    path('castlemaze/', include('castlemaze.urls')),
     path('login/', include('authenticate.urls')),
     path('testajax/', include('test_ajax.urls')),
 ]

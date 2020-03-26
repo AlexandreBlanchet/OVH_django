@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'tictactoe',
     'keepinmind',
     'payyourdrink',
+    'castlemaze',
     'crispy_forms',
     'test_ajax',
 ]

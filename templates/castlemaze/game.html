@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {{ game }}
+{% endblock title %}
+{% block styling %}
+    {{ block.super }}
+    <style type="text/css">
+
+    .tictactoe-table {
+        table-layout:fixed; 
+        display:block;
+        border-width: 2px;
+    }
+    .tictactoe-cell {
+        background-color: #debb27;
+        width: 100px;
+        height: 100px;
+        text-align: center;
+        vertical-align: middle !important;
+        padding:0px;
+        margin:0px;
+    }
+    </style>
+{% endblock styling %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 card">
+        <div class="card-body">
+            <p class="font-weight-bold"> Game status : </p>
+            <p>
+            {% if game.status == 'F' %}
+                {{ game.first_player }} to play
+            {% elif game.status == 'S' %}
+                {{ game.second_player }} to play
+            {% elif game.status == 'W' %}
+                {{ game.first_player }} won !
+            {% elif game.status == 'L' %}
+                {{ game.second_player }} won !
+            {% elif game.status == 'D' %}
+                It's a draw!
+            {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+    <div style="overflow: auto; max-height:600px;">
+    <table class="table table-bordered tictactoe-table">
+        {% for row in game.board %}
+            <tr>
+                {% for cell in row %}
+                    <td class="tictactoe-cell" style="padding:0px;" onclick="make_move({{game.id}},{{forloop.counter0}},{{forloop.parentloop.counter0}})">
+                        {% if cell %}
+                            <img 
+                                src="{% static cell.get_card_img %}"
+                            />
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %} 
+    </table>
+    </div>
+
+    <script src="{% static 'scripts/main.js' %}"></script>
+{% endblock content %}
