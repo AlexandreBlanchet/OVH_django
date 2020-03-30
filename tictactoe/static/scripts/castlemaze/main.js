@@ -1,7 +1,4 @@
 
-var selected_card = null
-
-
 function start_game(game_id){
     console.log('game with id ' + game_id + 'started')
     var XHR = new XMLHttpRequest();
@@ -36,93 +33,50 @@ function start_game(game_id){
 }
 
 function update_cells(jsonlist){
-    jsonlist.forEach(e => {
+    jsonlist.cards.forEach(e => {
         console.log(e)
-
-        if(e.action == 'delete') {
-            elem = document.getElementById('tile_'+ e.card_id);
-            elem.remove();
-        }
-        if(e.action == 'update') {
-            elem = document.getElementById('tile_'+ e.card_id);
-            cell = document.getElementById('cell_'+ e.cell_id);
-           
-            elem.style.left = cell.style.left
-            elem.style.top = cell.style.top
-            if(e.clickable == true) {
-                cell.className = "castlemaze-cell clickable";
-            } else {
-                cell.className = "castlemaze-cell";
-            }
-        }
-        if(e.action == 'create') {
-
-            old_card = document.getElementById('card_'+ e.card_id);
-            old_card.remove()
-            
-            cell = document.getElementById('cell_'+ e.cell_id);
-            var div = document.createElement('div');
-          
-            div.className = 'castlemaze-tile';
-            div.id = 'tile_'+ e.card_id;
-            cell.parentNode.appendChild(div);
-            div.style.top = cell.style.top;
-            div.style.left = cell.style.left;
-
-            var img = document.createElement('img');
-            img.style.width = "70px";
-            img.src = "/static/" + e.src;
-            div.appendChild(img)
+        card = document.getElementById('tile_'+ e.card_id);
+        card.style.left = e.left + 'px'
+        card.style.top = e.top + 'px'
+    });
+    jsonlist.players.forEach(e => {
+        console.log(e)
+        card = document.getElementById('player_'+ e.player_id);
+        card.style.left = e.left + 'px'
+        card.style.top = e.top + 'px'
+    });
+    jsonlist.cells.forEach(e => {
+        console.log(e)
+        cell = document.getElementById('cell_'+ e.cell_id);
+        cell.className = e.class
+        if(e.clickable == true) {
+            cell.dataset.clickable = 'True'
+        } else {
+            cell.dataset.clickable = 'False'
         }
     });
 
 }
-function sleep(milliseconds) {
-    const date = Date.now();
-    let currentDate = null;
-    do {
-      currentDate = Date.now();
-    } while (currentDate - date < milliseconds);
-  }
-
-function select_card(id){
-    console.log(id);
-    if (document.getElementById(id).style.width == '200px'){
-        document.getElementById(id).style.width= "100px";
-        selected_card = null
-
-    }
-    else {
-        document.getElementById(id).style.width= "200px";
-        selected_card = id
-    }
-}
 
 
 function action_request(cell_id){
-
-    var card_elem = document.getElementById(selected_card)
     var cell_elem = document.getElementById(cell_id)
-
-    if(selected_card == null) {
-        console.log('No card selected')
-        alert('No card selected')
+    if(cell_elem.dataset.clickable == 'False') {
+        console.log('action not permitted')
         return
     }
-    
+
     var XHR = new XMLHttpRequest();
     var FD  = new FormData();
 
 
     // Mettez les données dans l'objet FormData
     FD.append('cell_id', cell_elem.getAttribute('value'));
-    FD.append('card_id', card_elem.getAttribute('value'));
 
   
     // Définissez ce qui se passe si la soumission s'est opérée avec succès
     XHR.addEventListener('load', function(event) {
         console.log(XHR.response)
-        console.log(typeof(JSON.parse(XHR.response)))
         if (XHR.status == 403) {
             alert('Move forbidden ! ')
         }

@@ -9,16 +9,19 @@
     {{ block.super }}
     <style type="text/css">
 
-    .castlemaze-table {
-        border-width: 2px;
-        width: 1000px;
-        height: 600px;
+    .castlemaze-board {
+        overflow: auto; 
+        max-height:800px; 
+        position:relative; 
+        width:2000px; 
+        height:2000px;
+        background-image: url('/static/img/background.png');
     }
 
     .castlemaze-maze {
-        background-color: #debb27;
-        width: 68px;
-        height: 68px;
+        background-color: transparent;
+        width: 60px;
+        height: 60px;
         text-align: center;
         vertical-align: middle !important;
         padding:0px;
@@ -27,13 +30,11 @@
     }
 
     .castlemaze-tile {
-        width: 70px;
-        height: 70px;
         position: absolute;
         transition: left 1s ease-out, top 1s ease-out;
     }
     .castlemaze-card {
-        background-color: #de0027;
+        background-color: transparent;
         width: 90px;
         height: 140px;
         position: absolute;
@@ -41,33 +42,43 @@
         vertical-align: middle !important;
         padding:0px;
         margin:0px;
+        border: 3px solid;
     }
 
     .clickable:hover {
         background-color:green;
         filter: drop-shadow(8px 8px 12px);
     }
+    .clickable {
+        border: 2px solid green;  
+    }
 
     </style>
 {% endblock styling %}
 
 {% block content %}
-{{player_cells}}
-    <div style="overflow: auto; max-height:800px; position:relative; width:3000px; height:3000px;">
-            {% for cell in game.board %}
-                <div id="cell_{{cell.pk}}" value="{{cell.pk}}" class="{{cell.get_class}}" style="padding:0px; left:{{cell.get_left_offset}}px;  top:{{cell.get_top_offset}}px;" onclick="action_request(id)">
-                </div>
-            {% endfor %} 
-            {% for card in cards %}
+    <div class="castlemaze-board">
+        <button class="btn btn-primary" style="position:absolute; left:1300px;" onclick="start_game({{game.pk}})"> Start Game </button>
+            {% for card in board.cards %}
                 <div class="castlemaze-tile"  id="tile_{{card.card_id}}" style="padding:0px; left:{{card.left}}px;  top:{{card.top}}px;">
-                    <img  style="width:70px;"
+                    <img  style="width:60px;"
                             src="{% static card.display %}"
                     /> 
                     </div>
             {% endfor %} 
+            {% for player in board.players %}
+                <div class="castlemaze-tile"  id="player_{{player.player_id}}" style="padding:0px; left:{{player.left}}px;  top:{{player.top}}px;">
+                    <img  style="width:60px;"
+                            src="{% static player.display %}"
+                    /> 
+                    </div>
+            {% endfor %} 
+            {% for cell in board.cells %}
+                <div id="cell_{{cell.cell_id}}" value="{{cell.cell_id}}" data-clickable="{{cell.clickable}}" class="{{cell.class}}" style="padding:0px; left:{{cell.left}}px;  top:{{cell.top}}px;" onclick="action_request(id)">
+                </div>
+            {% endfor %} 
     </div>
     <p></p>
-    <button style="btn btn-primary" onclick="start_game({{game.pk}})"> Start Game </button>
     
     <script src="{% static 'scripts/castlemaze/main.js' %}"></script>
 {% endblock content %}

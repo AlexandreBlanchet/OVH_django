@@ -13,21 +13,40 @@ GAME_STATUS_CHOICES = (
 )
 
 CELL_TYPES = {
-    'maze' : {'offset_top': 0, 'offset_left': 0, 'width': 70, 'height': 70, 'class': 'castlemaze-maze' },
-    'player_hand' : {'offset_top': 600, 'offset_left': 30, 'width': 100, 'height': 150, 'class': 'castlemaze-card' },
-    'other_hands' : {'offset_top': 100, 'offset_left': 1400, 'width': 100, 'height': 150, 'class': 'castlemaze-card' },
-    'deck' : {'offset_top': 0, 'offset_left': 1000, 'width': 100, 'height': 150, 'class': 'castlemaze-card' },
+    'maze' : {'offset_top': 20, 'offset_left': 20, 'width': 60, 'height': 60, 'class': 'castlemaze-maze' },
+    'player_hand' : {'offset_top': 400, 'offset_left': 900, 'width': 100, 'height': 150, 'class': 'castlemaze-card' },
+    'other_hands' : {'offset_top': 100, 'offset_left': 1300, 'width': 100, 'height': 150, 'class': 'castlemaze-card' },
+    'deck' : {'offset_top': 10, 'offset_left': 1000, 'width': 100, 'height': 150, 'class': 'castlemaze-card' },
 }
 
 BOARD_WIDTH=14
-BOARD_HEIGTH=8
+BOARD_HEIGTH=9
 NUMBER_OF_CARDS_PER_PLAYER=6
 
 NOT_CLICKABLE_COORD = (
     (0,0),
     (0,BOARD_HEIGTH-1),
     (BOARD_WIDTH-1,0),
-    (BOARD_WIDTH-1,BOARD_HEIGTH-1)
+    (BOARD_WIDTH-1,BOARD_HEIGTH-1),
+    (0,3),
+    (0,4),
+    (0,5),
+    (BOARD_WIDTH-1,3),
+    (BOARD_WIDTH-1,4),
+    (BOARD_WIDTH-1,5),
+    (3,0),
+    (3,BOARD_HEIGTH-1),
+    (10,0),
+    (10,BOARD_HEIGTH-1),
+)
+
+CASTLE_COORD = (
+    (3,3),
+    (3,4),
+    (3,5),
+    (10,3),
+    (10,4),
+    (10,5),
 )
 
 class Card(models.Model):
@@ -50,48 +69,75 @@ class Deck(models.Model):
 class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     cards = models.ManyToManyField(Card)
+    cell = models.ForeignKey('Cell', on_delete=models.CASCADE, null = True)
 
-class GamesQuerySet(models.QuerySet):
-    def games_for_user(self, user):
-
-        return self.filter(
-            Q(first_player=user) | Q(second_player=user)
-        )
-
-    def active(self):
-        return self.filter(Q(status='F') | Q(status='S'))
-        
 class Game(models.Model):
     name = models.CharField(max_length=100)
     start_time = models.DateTimeField(auto_now_add=True)
     last_active = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=1, default='F', choices=GAME_STATUS_CHOICES)
+    card_selected = models.ForeignKey(Card, on_delete=models.CASCADE, null=True)
     deck = models.ForeignKey(Deck, on_delete=models.CASCADE, null=True)
     players = models.ManyToManyField(Player)
     max_number_of_players = models.IntegerField(default=6)
     player_turn = models.IntegerField(default=0)
-    objects = GamesQuerySet.as_manager()
 
     def board(self):
-        """Return the board"""
         return self.cell_set.all()
+
+    def get_board(self, user):
+        """Return the board"""
+        board = {}
+        board['cells'] = self.get_cells(user)
+        board['cards'] = self.get_cards_positions(user)
+        board['players'] = self.get_players_positions()
+        return board
+
+
+    def get_cells(self, user):
+        # TODO getting only modified cards
+        cells = []
+        for cell in self.cell_set.all() :
+            clickable = False
+            click_class = ''
+            if not self.card_selected and cell.cell_type == 'player_hand':
+                clickable = True
+                click_class = ' clickable'
+            if self.card_selected and cell.cell_type == 'maze' and (cell.x == 0 or cell.x == BOARD_WIDTH - 1 or cell.y == 0 or cell.y == BOARD_HEIGTH - 1):
+                clickable = True
+                click_class = ' clickable'
+            if (cell.x, cell.y) in NOT_CLICKABLE_COORD and cell.cell_type == 'maze' :
+                clickable = False
+                click_class = ''
+
+            cells.append({'cell_id':cell.pk, 'clickable': clickable, 'class' : cell.get_class() + click_class, 'left': cell.get_left_offset(), 'top': cell.get_top_offset()})
+        return cells
 
     def get_cards_positions(self, user):
         list_cards = []
         for cell in self.cell_set.all():
             if cell.card :
-                list_cards.append({'card_id': cell.card.pk, 'left': cell.get_left_offset(), 'top': cell.get_top_offset, 'display': cell.card.get_display})
+                list_cards.append({'card_id': cell.card.pk, 'left': cell.get_left_offset(), 'top': cell.get_top_offset(), 'display': cell.card.get_display()})
         
         deck_cell = self.cell_set.filter(cell_type='deck')[0]
         for card in self.deck.cards.all() :
-            list_cards.append({'card_id': card.pk, 'left': deck_cell.get_left_offset(), 'top': deck_cell.get_top_offset, 'display': card.get_display})
+            list_cards.append({'card_id': card.pk, 'left': deck_cell.get_left_offset(), 'top': deck_cell.get_top_offset(), 'display': card.get_display()})
 
         player_cards = self.players.get(user=user).cards.all()
         player_cells = self.cell_set.filter(cell_type='player_hand')
         for i in range(len(player_cards)):
-            list_cards.append({'card_id': player_cards[i].pk, 'left': player_cells[i].get_left_offset(), 'top': player_cells[i].get_top_offset, 'display': player_cards[i].get_display})
+            list_cards.append({'card_id': player_cards[i].pk, 'left': player_cells[i].get_left_offset(), 'top': player_cells[i].get_top_offset(), 'display': player_cards[i].get_display()})
         
         return list_cards
+
+    def get_players_positions(self):
+        list_players = []
+        for player in self.players.all():
+            if player.cell:
+                list_players.append({'player_id': player.pk, 'left': player.cell.get_left_offset(), 'top': player.cell.get_top_offset(), 'display': 'img/player_1.png'})
+        return list_players
+
+
 
     def  new_deck(self):
         """ TODO adding boolean to be able to create the deck only one time """
@@ -116,6 +162,9 @@ class Game(models.Model):
             cell.save()
         cell = Cell(x=0, y=0, game=self, cell_type='deck')
         cell.save()
+        for player in self.players.all():
+            player.cell = cell
+            player.save()
 
     def draw_cards_to_players(self):
         for player in self.players.all():
@@ -127,37 +176,53 @@ class Game(models.Model):
                     player.cards.add(self.deck.draw())
 
     def start_game(self):
-        cell_content_created=[]
-        for cell in self.cell_set.filter(cell_type='maze'):
-            if cell.x > 0 and cell.x < BOARD_WIDTH - 1 and cell.y > 0 and cell.y < BOARD_HEIGTH - 1 :
-                cell.card = self.deck.draw()
-                cell.save()
-                cell_content_created.append({'cell_id': cell.pk, 'card_id': cell.card.pk, 'action': 'update'})
-        return cell_content_created
-
-    def move_cards(self, card, cell_border):
-        cell_list = []
-        temp_card = card
+        self.draw_cards_to_players()
         
+        player = self.players.all()[0]
+        cell = self.cell_set.filter(cell_type='maze', x=6, y=2)[0]
+        player.cell = cell
+        player.save()
+        self.save()
+        for cell in self.cell_set.filter(cell_type='maze'):
+            if cell.x == 0 or cell.x == BOARD_WIDTH - 1 or cell.y == 0 or cell.y == BOARD_HEIGTH - 1 or (cell.x,cell.y) in CASTLE_COORD :
+                continue
+            card = self.deck.draw()
+            if card :
+                cell.card = card
+                cell.save()
+
+    def move_cards(self, cell_border, user):
+        if not self.card_selected :
+            return
+        self.players.get(user=user).cards.remove(self.card_selected)
+        temp_card = self.card_selected
+        cell_players = []
+        self.card_selected = None
         if cell_border.x == 0 :
-            sorted_elements = sorted(self.cell_set.filter(cell_type='board', y=cell_border.y), key=lambda a: a.x)
+            sorted_elements = sorted(self.cell_set.filter(cell_type='maze', y=cell_border.y), key=lambda a: a.x)
         elif cell_border.x == BOARD_WIDTH - 1 :
-            sorted_elements = sorted(self.cell_set.filter(cell_type='board', y=cell_border.y), key=lambda a: a.x, reverse=True)
+            sorted_elements = sorted(self.cell_set.filter(cell_type='maze', y=cell_border.y), key=lambda a: a.x, reverse=True)
         elif cell_border.y == 0 :
-            sorted_elements = sorted(self.cell_set.filter(cell_type='board', x=cell_border.x), key=lambda a: a.y)
+            sorted_elements = sorted(self.cell_set.filter(cell_type='maze', x=cell_border.x), key=lambda a: a.y)
         elif cell_border.y == BOARD_HEIGTH - 1 :
-            sorted_elements = sorted(self.cell_set.filter(cell_type='board', x=cell_border.x), key=lambda a: a.y, reverse=True)
+            sorted_elements = sorted(self.cell_set.filter(cell_type='maze', x=cell_border.x), key=lambda a: a.y, reverse=True)
         for cell in sorted_elements :
             if cell.card == None :
                 continue
-            cell_list.append({'cell_id': cell.pk, 'card_id': temp_card.pk, 'action': 'update'})
-            
             temp_card, cell.card = cell.card, temp_card
+            temp_players = []
+            for player in cell.player_set.all():
+                temp_players.append(player)
+            if len(cell_players) > 0 :
+                for player in cell_players :
+                    player.cell = cell
+                    player.save()
+            cell_players = []
+            for player in temp_players :
+                cell_players.append(player)
             cell.save()
-        cell_list.append({'cell_id': cell.pk, 'card_id': temp_card.pk, 'action': 'delete'})
-
-                
-        return cell_list
+        self.deck.cards.add(temp_card)
+        self.save()
 
     def get_number_of_players(self):
         return self.players.count()
@@ -181,7 +246,6 @@ class Cell(models.Model):
     game = models.ForeignKey(Game, editable=False, on_delete=models.CASCADE)
     card = models.ForeignKey(Card, on_delete=models.CASCADE, null=True)
     cell_type = models.CharField(max_length=100, default='maze')
-    clickable = models.BooleanField(default=False)
 
     # TODO find a bether way to use this
     displayed_card = models.ForeignKey(Card, related_name="cell_displayed_card", on_delete=models.CASCADE, null=True)
@@ -193,15 +257,12 @@ class Cell(models.Model):
         else :
             return None
 
-    def is_clickable(self):
-        return self.clickable
-
     def get_left_offset(self):
         return CELL_TYPES[self.cell_type]['offset_left'] + CELL_TYPES[self.cell_type]['width'] * self.x 
 
     def get_top_offset(self):
         return CELL_TYPES[self.cell_type]['offset_top'] + CELL_TYPES[self.cell_type]['height'] * self.y 
 
-    def get_class(self):
+    def get_class(self): 
         return CELL_TYPES[self.cell_type]['class']
 
