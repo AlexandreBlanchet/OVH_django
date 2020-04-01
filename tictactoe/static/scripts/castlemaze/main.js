@@ -1,5 +1,12 @@
 
+
+
+var game_socket
+
+
+
 function start_game(game_id){
+
     console.log('game with id ' + game_id + 'started')
     var XHR = new XMLHttpRequest();
     var FD  = new FormData();
@@ -34,19 +41,19 @@ function start_game(game_id){
 
 function update_cells(jsonlist){
     jsonlist.cards.forEach(e => {
-        console.log(e)
-        card = document.getElementById('tile_'+ e.card_id);
-        card.style.left = e.left + 'px'
-        card.style.top = e.top + 'px'
+        card = document.getElementById('card_'+ e.card_id);
+        img = document.getElementById('img_'+ e.card_id);
+        card.style.left = e.left + 'px';
+        card.style.top = e.top + 'px';
+        card.className = e.class;
+        img.src = '/static/'  + e.display
     });
     jsonlist.players.forEach(e => {
-        console.log(e)
         card = document.getElementById('player_'+ e.player_id);
         card.style.left = e.left + 'px'
         card.style.top = e.top + 'px'
     });
     jsonlist.cells.forEach(e => {
-        console.log(e)
         cell = document.getElementById('cell_'+ e.cell_id);
         cell.className = e.class
         if(e.clickable == true) {
@@ -60,6 +67,7 @@ function update_cells(jsonlist){
 
 
 function action_request(cell_id){
+
     var cell_elem = document.getElementById(cell_id)
     if(cell_elem.dataset.clickable == 'False') {
         console.log('action not permitted')

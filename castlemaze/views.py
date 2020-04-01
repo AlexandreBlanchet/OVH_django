@@ -4,10 +4,6 @@ from .models import Game, Cell, Card, Player
 from django.contrib.auth.models import User
 from django.http import HttpResponse, JsonResponse
 
-
-
-
-
 @login_required()
 def home(request):
     games = Game.objects.all()
@@ -34,7 +30,6 @@ def game(request, id):
         if not game.players.filter(user = request.user) :
             return redirect('castlemaze_home')
         board = game.get_board(request.user)
-
         return render(request, "castlemaze/game.html", {'app':'castlemaze', 'appname':'Castle Maze', 'game': game, 'board': board})
 
 def welcome(request):
@@ -47,7 +42,7 @@ def welcome(request):
 def action_request(request):
     if request.method == 'POST':
         cell = get_object_or_404(Cell, pk = request.POST.get('cell_id'))
-        if cell.cell_type == 'player_hand' and not cell.game.card_selected:
+        if cell.cell_type == 'player_hand':
             card = cell.game.players.get(user=request.user).cards.all()[cell.x]
             cell.game.card_selected = card
             cell.game.save()

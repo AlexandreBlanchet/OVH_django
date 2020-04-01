@@ -11,9 +11,9 @@
 
     .castlemaze-board {
         overflow: auto; 
-        max-height:800px; 
         position:relative; 
         width:2000px; 
+        max-height:1500px;
         height:2000px;
         background-image: url('/static/img/background.png');
     }
@@ -27,22 +27,26 @@
         padding:0px;
         margin:0px;
         position: absolute;
+        transition: left 1s ease-out, top 1s ease-out;
     }
 
-    .castlemaze-tile {
-        position: absolute;
-        transition: left 1s ease-out, top 1s ease-out;
+    .castlemaze-maze > img {
+        width:60px;
+    }
+    .castlemaze-card > img {
+        width:100px;
     }
     .castlemaze-card {
         background-color: transparent;
-        width: 90px;
-        height: 140px;
+        width: 100px;
+        height: 150px;
         position: absolute;
         text-align: center;
         vertical-align: middle !important;
         padding:0px;
         margin:0px;
         border: 3px solid;
+        transition: left 1s ease-out, top 1s ease-out;
     }
 
     .clickable:hover {
@@ -57,18 +61,19 @@
 {% endblock styling %}
 
 {% block content %}
+    {{ game.pk|json_script:"game_id" }}
     <div class="castlemaze-board">
         <button class="btn btn-primary" style="position:absolute; left:1300px;" onclick="start_game({{game.pk}})"> Start Game </button>
             {% for card in board.cards %}
-                <div class="castlemaze-tile"  id="tile_{{card.card_id}}" style="padding:0px; left:{{card.left}}px;  top:{{card.top}}px;">
-                    <img  style="width:60px;"
+                <div class="{{card.class}}"  id="card_{{card.card_id}}" style="padding:0px; left:{{card.left}}px;  top:{{card.top}}px;">
+                    <img  id="img_{{card.card_id}}"
                             src="{% static card.display %}"
                     /> 
                     </div>
             {% endfor %} 
             {% for player in board.players %}
-                <div class="castlemaze-tile"  id="player_{{player.player_id}}" style="padding:0px; left:{{player.left}}px;  top:{{player.top}}px;">
-                    <img  style="width:60px;"
+                <div class="{{player.class}}"  id="player_{{player.player_id}}" style="padding:0px; left:{{player.left}}px;  top:{{player.top}}px;">
+                    <img 
                             src="{% static player.display %}"
                     /> 
                     </div>

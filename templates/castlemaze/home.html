@@ -6,6 +6,10 @@
             {% for game in games_list %}
                     <a class="list-group-item list-group-item-action  d-flex justify-content-between align-items-center" href="{{ game.get_absolute_url }}">
                         {{game.pk}} Number of players{{game.get_number_of_players}}
+                        {% if game.status == 'P' %} Join
+                        {% else %}
+                            See the game
+                        {% endif %}
                     </a>
             {% endfor %}
         </div>
