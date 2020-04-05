@@ -2,8 +2,12 @@
 
 {% block  content%}
     <div class="row">
-        <div class="col-md-6" style="overflow: auto; max-height:600px;">
-            {% for game in games_list %}
+        <div class="card col-md-6" style="padding:10px;">
+            <div class="card-header">
+                Games not started
+            </div>
+            <div class="card-body"  style="overflow: auto; max-height:300px;">
+                 {% for game in games_open %}
                     <a class="list-group-item list-group-item-action  d-flex justify-content-between align-items-center" href="{{ game.get_absolute_url }}">
                         {{game.pk}} Number of players{{game.get_number_of_players}}
                         {% if game.status == 'P' %} Join
@@ -11,7 +15,8 @@
                             See the game
                         {% endif %}
                     </a>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
         <div class="col-md-6">
             <div class="card">
@@ -20,8 +25,24 @@
                 </div>
                 <div class="card-body">
                 Number of game played
-                <a class="btn btn-primary">Create New Game</a>
+                <a class="btn btn-primary" href="{% url 'castlemaze_game' id=0 %}">Create New Game</a>
                 </div>
+            </div>
+        </div>
+         <div class="card col-md-6" style="padding:10px;">
+            <div class="card-header">
+                Games in progress
+            </div>
+            <div class="card-body"  style="overflow: auto; max-height:300px;">
+                 {% for game in games_started %}
+                    <a class="list-group-item list-group-item-action  d-flex justify-content-between align-items-center" href="{{ game.get_absolute_url }}">
+                        {{game.pk}} Number of players{{game.get_number_of_players}}
+                        {% if game.status == 'P' %} Join
+                        {% else %}
+                            See the game
+                        {% endif %}
+                    </a>
+                {% endfor %}
             </div>
         </div>
     </div>
