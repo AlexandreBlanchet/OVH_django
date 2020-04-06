@@ -1,7 +1,7 @@
 const game_id = JSON.parse(document.getElementById('game_id').textContent);
 
 const chatSocket = new WebSocket(
-    'ws://'
+    'wss://'
     + window.location.host
     + '/ws/castlemaze/game/'
     + game_id
@@ -17,7 +17,7 @@ chatSocket.onmessage = function(e) {
 chatSocket.onclose = function(e) {
     console.error('Chat socket closed unexpectedly');
     chatSocket = new WebSocket(
-        'ws://'
+        'wss://'
         + window.location.host
         + '/ws/castlemaze/game/'
         + game_id
