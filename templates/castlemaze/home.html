@@ -2,18 +2,14 @@
 
 {% block  content%}
     <div class="row">
-        <div class="card col-md-6" style="padding:10px;">
+        <div class="card col-md-6">
             <div class="card-header">
                 Games not started
             </div>
             <div class="card-body"  style="overflow: auto; max-height:300px;">
                  {% for game in games_open %}
                     <a class="list-group-item list-group-item-action  d-flex justify-content-between align-items-center" href="{{ game.get_absolute_url }}">
-                        {{game.pk}} Number of players{{game.get_number_of_players}}
-                        {% if game.status == 'P' %} Join
-                        {% else %}
-                            See the game
-                        {% endif %}
+                        Game id : {{game.pk}}      ---       Number of players {{game.get_number_of_players}}     ---     Click to join the game
                     </a>
                 {% endfor %}
             </div>
@@ -21,26 +17,21 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    {{user.username}}
+                    Hello {{user.username}} !
                 </div>
                 <div class="card-body">
-                Number of game played
                 <a class="btn btn-primary" href="{% url 'castlemaze_game' id=0 %}">Create New Game</a>
                 </div>
             </div>
         </div>
-         <div class="card col-md-6" style="padding:10px;">
+         <div class="card col-md-6">
             <div class="card-header">
                 Games in progress
             </div>
             <div class="card-body"  style="overflow: auto; max-height:300px;">
                  {% for game in games_started %}
                     <a class="list-group-item list-group-item-action  d-flex justify-content-between align-items-center" href="{{ game.get_absolute_url }}">
-                        {{game.pk}} Number of players{{game.get_number_of_players}}
-                        {% if game.status == 'P' %} Join
-                        {% else %}
-                            See the game
-                        {% endif %}
+                           Game id : {{game.pk}}      ---       Number of players {{game.get_number_of_players}}     ---     Click to spectate the game
                     </a>
                 {% endfor %}
             </div>
