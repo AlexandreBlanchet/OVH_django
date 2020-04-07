@@ -82,6 +82,8 @@ class Card(models.Model):
 
 class Deck(models.Model):
     card_order = models.CharField(max_length=3000, null=True)
+    deck_type = models.CharField(max_length=100, default='tile')
+    game = models.ForeignKey('Game', on_delete=models.CASCADE, null=True)
 
     def add_card(self, card):
         self.card_order += ';' + str(card.pk)
@@ -108,7 +110,6 @@ class Game(models.Model):
     last_active = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=1, default='P', choices=GAME_STATUS_CHOICES)
     card_selected = models.ForeignKey(Card, on_delete=models.CASCADE, null=True)
-    deck = models.ForeignKey(Deck, on_delete=models.CASCADE, null=True)
     max_number_of_players = models.IntegerField(default=6)
     player_turn = models.IntegerField(default=0)
     last_cell_played = models.ForeignKey('Cell', related_name='last_cell_player', on_delete=models.CASCADE, null = True)
@@ -331,7 +332,7 @@ class Game(models.Model):
     def get_deck_cards(self):
         list_cards = []
         deck_cell = self.cell_set.filter(cell_type='deck')[0]
-        for card_id in self.deck.card_order.split(';') :
+        for card_id in self.deck_set.get(deck_type='tile').card_order.split(';') + self.deck_set.get(deck_type='action').card_order.split(';'):
             list_cards.append({'card_id': card_id, 'left': deck_cell.get_left_offset(), 'top': deck_cell.get_top_offset(), 'display': 'img/card_back.png', 'class': 'castlemaze-card'})
         return list_cards
 
@@ -372,22 +373,18 @@ class Game(models.Model):
 
     def  new_deck(self):
         """ TODO adding boolean to be able to create the deck only one time """
-        deck = Deck()
-        deck.save()
-        self.deck = deck
-        self.save()
+        deck_tile = Deck(game=self)
+        cards_tile = [str(card.pk) for card in list(Card.objects.filter(card_type='tile'))]
+        random.shuffle(cards_tile)
+        deck_tile.card_order = ';'.join(cards_tile)
+        deck_tile.save()
 
-        # We put in the deck the tiles needed for the board first
-        cards_tiles = [str(card.pk) for card in list(Card.objects.filter(card_type='tile'))]
+
+        deck_action = Deck(game=self, deck_type='action')
         cards_action = [str(card.pk) for card in  list(Card.objects.filter(card_type='action'))]
-        random.shuffle(cards_tiles)
-        board_number_of_tiles = (BOARD_WIDTH-2)*(BOARD_HEIGTH-2)
-        final_deck = cards_tiles[:board_number_of_tiles]
-        temp_deck = cards_tiles[board_number_of_tiles:]+cards_action
-        random.shuffle(temp_deck)
-        final_deck = final_deck + temp_deck
-        deck.card_order = ';'.join(final_deck)
-        deck.save()
+        random.shuffle(cards_action)
+        deck_action.card_order = ';'.join(cards_action)
+        deck_action.save()
 
     def generate_cell_list(self):
         dict_castle_cards = {}
@@ -417,11 +414,17 @@ class Game(models.Model):
         cell_game_status.save()
 
     def draw_cards_to_players(self):
-        for _ in range(NUMBER_OF_CARDS_PER_PLAYER):
+        for _ in range(3):
             for player in self.player_set.all():
-                card = self.deck.draw()
+                card = self.deck_set.get(deck_type='tile').draw()
                 if card:
-                    player.cards.add(self.deck.draw())
+                    player.cards.add(card)
+        for _ in range(3):
+            for player in self.player_set.all():
+                card = self.deck_set.get(deck_type='action').draw()
+                if card:
+                    player.cards.add(card)
+                    
 
     def start_game(self):
         if self.status != 'P':
@@ -431,7 +434,7 @@ class Game(models.Model):
         for cell in self.cell_set.filter(cell_type='maze'):
             if cell.x == 0 or cell.x == BOARD_WIDTH - 1 or cell.y == 0 or cell.y == BOARD_HEIGTH - 1 or (cell.x,cell.y) in CASTLE_COORD :
                 continue
-            card = self.deck.draw()
+            card = self.deck_set.get(deck_type='tile').draw()
             if card :
                 cell.card = card
                 cell.save()
@@ -457,12 +460,15 @@ class Game(models.Model):
         player = self.player_set.get(user=user)
         if self.card_selected.card_type=='tile':
             returned_card = self.move_cards(cell)
-            self.deck.add_card(returned_card)
+            deck_tile = self.deck_set.get(deck_type='tile')
+            deck_tile.add_card(returned_card)
+            player.cards.add(deck_tile.draw())
         else:
             self.move_player(cell, player)
-            self.deck.add_card(self.card_selected)
+            deck_action = self.deck_set.get(deck_type='action')
+            deck_action.add_card(self.card_selected)
+            player.cards.add(deck_action.draw())
         player.cards.remove(self.card_selected)
-        player.cards.add(self.deck.draw())
 
 
         

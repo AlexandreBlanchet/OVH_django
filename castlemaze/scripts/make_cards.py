@@ -179,7 +179,7 @@ card = Card()
 card.img = 'castle_left'
 card.card_type = 'castle'
 card.open_top = False
-card.open_left = False
+card.open_left = True
 card.open_bottom = False
 card.open_right = False
 card.number_of_moves = 0
@@ -192,6 +192,6 @@ card.card_type = 'castle'
 card.open_top = False
 card.open_left = False
 card.open_bottom = False
-card.open_right = False
+card.open_right = True
 card.number_of_moves = 0
 card.save()
