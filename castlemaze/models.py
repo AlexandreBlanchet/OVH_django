@@ -66,6 +66,7 @@ def send_update_to_players(game_id, players, user, json):
 class Card(models.Model):
     img = models.CharField(max_length=30, default="cell.png")
     card_type = models.CharField(max_length=100, default='tile')
+    trap = models.CharField(max_length=100, default='')
 
     open_top = models.BooleanField(default=False)
     open_left = models.BooleanField(default=False)
@@ -73,11 +74,25 @@ class Card(models.Model):
     open_right = models.BooleanField(default=False)
     number_of_moves = models.IntegerField(default=0)
 
+    activated_open_top = models.BooleanField(default=False)
+    activated_open_left = models.BooleanField(default=False)
+    activated_open_bottom = models.BooleanField(default=False)
+    activated_open_right = models.BooleanField(default=False)
+
     def get_tile_display(self):
         return 'img/' + self.img + '.png'
     
     def get_card_display(self):
-        return 'img/card_' + self.img + '.png'
+        if self.trap :
+            return 'img/card_'  + self.trap + '_'  + self.img + '.png'
+        else:
+            return 'img/card_' + self.img + '.png'
+
+    def get_trap_display(self):
+        return 'img/trap_' + self.trap + '_' + self.img + '.png'
+    
+    def get_trap_activated_display(self):
+        return 'img/trap_activated_' + self.trap + '_' + self.img + '.png'
 
     def get_tile_style(self):
         return 'width:60px'
@@ -113,6 +128,7 @@ class Player(models.Model):
     status_played_tile = models.BooleanField(default=False)
     status_played_action = models.BooleanField(default=False)
     remaining_moves = models.IntegerField(default=0)
+    trap_visible = models.ManyToManyField(Card, related_name='trap_cards')
 
 class Game(models.Model):
     name = models.CharField(max_length=100)
@@ -123,6 +139,7 @@ class Game(models.Model):
     max_number_of_players = models.IntegerField(default=6)
     player_turn = models.IntegerField(default=0)
     last_cell_played = models.ForeignKey('Cell', related_name='last_cell_player', on_delete=models.CASCADE, null = True)
+    activated_traps = models.ManyToManyField(Card, related_name='activated_traps')
 
 
     def force_next_player(self):
@@ -194,7 +211,7 @@ class Game(models.Model):
         """Return the board"""
         board = {}
         board['cells'] = self.get_cells_for_player(user)
-        board['cards'] = self.get_maze_cards_positions() + self.get_deck_cards() + self.get_other_players_cards(user) + self.get_player_cards(user)
+        board['cards'] = self.get_maze_cards_positions(user) + self.get_deck_cards() + self.get_other_players_cards(user) + self.get_player_cards(user)
         board['pawns'] = self.get_players_pawn_positions()
         board['game_status'] = self.get_players() + self.get_game_status(user)
         return board
@@ -252,18 +269,45 @@ class Game(models.Model):
         return list_players
 
 
+    def get_card_open_status(self, card, direction):
+        activated = card in self.activated_traps.all()
+        if direction == 'top':
+            if activated:
+                return card.activated_open_top
+            else:
+                return card.open_top
+        if direction == 'left':
+            if activated:
+                return card.activated_open_left
+            else:
+                return card.open_left
+        if direction == 'bottom':
+            if activated:
+                return card.activated_open_bottom
+            else:
+                return card.open_bottom
+        if direction == 'right':
+            if activated:
+                return card.activated_open_right
+            else:
+                return card.open_right
+
+
+
+
     def get_available_neighbours(self, maze, cell_elem, depth, seen):
         if depth == 0 :
             return [cell_elem]
         neighbours = [cell_elem]
         seen.append(cell_elem)
-        if cell_elem.card.open_top and maze[cell_elem.y-1][cell_elem.x] and maze[cell_elem.y-1][cell_elem.x] not in seen and maze[cell_elem.y-1][cell_elem.x].card and maze[cell_elem.y-1][cell_elem.x].card.open_bottom:
+        card = cell_elem.card
+        if self.get_card_open_status(card, 'top') and maze[cell_elem.y-1][cell_elem.x] and maze[cell_elem.y-1][cell_elem.x] not in seen and maze[cell_elem.y-1][cell_elem.x].card and self.get_card_open_status(maze[cell_elem.y-1][cell_elem.x].card, 'bottom'):
             neighbours += self.get_available_neighbours(maze, maze[cell_elem.y-1][cell_elem.x], depth - 1, seen)
-        if cell_elem.card.open_right and maze[cell_elem.y][cell_elem.x+1] and maze[cell_elem.y][cell_elem.x+1] not in seen and maze[cell_elem.y][cell_elem.x+1].card and maze[cell_elem.y][cell_elem.x+1].card.open_left:
+        if self.get_card_open_status(card, 'right') and maze[cell_elem.y][cell_elem.x+1] and maze[cell_elem.y][cell_elem.x+1] not in seen and maze[cell_elem.y][cell_elem.x+1].card and self.get_card_open_status(maze[cell_elem.y][cell_elem.x+1].card, 'left'):
             neighbours += self.get_available_neighbours(maze, maze[cell_elem.y][cell_elem.x+1], depth - 1, seen)
-        if cell_elem.card.open_bottom and maze[cell_elem.y+1][cell_elem.x] and maze[cell_elem.y+1][cell_elem.x] not in seen and maze[cell_elem.y+1][cell_elem.x].card and maze[cell_elem.y+1][cell_elem.x].card.open_top:
+        if self.get_card_open_status(card, 'bottom') and maze[cell_elem.y+1][cell_elem.x] and maze[cell_elem.y+1][cell_elem.x] not in seen and maze[cell_elem.y+1][cell_elem.x].card and self.get_card_open_status(maze[cell_elem.y+1][cell_elem.x].card, 'top'):
             neighbours += self.get_available_neighbours(maze, maze[cell_elem.y+1][cell_elem.x], depth - 1, seen)
-        if cell_elem.card.open_left and maze[cell_elem.y][cell_elem.x-1] and maze[cell_elem.y][cell_elem.x-1] not in seen and maze[cell_elem.y][cell_elem.x-1].card and maze[cell_elem.y][cell_elem.x-1].card.open_right:
+        if self.get_card_open_status(card, 'left') and maze[cell_elem.y][cell_elem.x-1] and maze[cell_elem.y][cell_elem.x-1] not in seen and maze[cell_elem.y][cell_elem.x-1].card and self.get_card_open_status(maze[cell_elem.y][cell_elem.x-1].card, 'right'):
             neighbours += self.get_available_neighbours(maze, maze[cell_elem.y][cell_elem.x-1], depth - 1, seen)            
         return neighbours
         
@@ -360,12 +404,19 @@ class Game(models.Model):
             cells.append({'cell_id': cell.pk, 'clickable': clickable, 'class' : cell.get_class() + click_class, 'left': cell.get_left_offset(), 'top': cell.get_top_offset()})
         return cells
 
-    def get_maze_cards_positions(self):
+    def get_maze_cards_positions(self, user=None):
         # TODO change class name using dict
         list_cards = []
+        if user :
+            player = self.player_set.get(user=user)
         for cell in self.cell_set.all():
             if cell.card :
-                list_cards.append({'card_id': cell.card.pk, 'left': cell.get_left_offset(), 'top': cell.get_top_offset(), 'display': cell.card.get_tile_display(), 'class': 'castlemaze-maze'})
+                display = cell.card.get_tile_display()
+                if user and cell.card in player.trap_visible.all() and cell.card.trap :
+                    display = cell.card.get_trap_display()
+                if cell.card in self.activated_traps.all():
+                    display = cell.card.get_trap_activated_display()
+                list_cards.append({'card_id': cell.card.pk, 'left': cell.get_left_offset(), 'top': cell.get_top_offset(), 'display': display, 'class': 'castlemaze-maze'})
         return list_cards
 
     def get_deck_cards(self):
@@ -474,6 +525,7 @@ class Game(models.Model):
                 card = self.deck_set.get(deck_type='tile').draw()
                 if card:
                     player.tile_cards.add(card)
+                    player.trap_visible.add(card)
         for _ in range(NUMBER_OF_CARDS_PER_PLAYER//2):
             for player in self.player_set.all():
                 card = self.deck_set.get(deck_type='action').draw()
@@ -514,6 +566,11 @@ class Game(models.Model):
         and self.card_selected not in self.player_set.get(user=user).tile_cards.all():
             return
         player = self.player_set.get(user=user)
+        if self.card_selected.card_type == 'action' and not player.status_played_action:
+            player.remaining_moves = self.card_selected.number_of_moves
+            player.status_played_action = True
+
+
         if self.card_selected.card_type == 'action' and player.remaining_moves > 0:
             self.move_player(cell, player)
             player.remaining_moves -= 1
@@ -526,15 +583,9 @@ class Game(models.Model):
             player = self.player_set.get(user=user)
             player.tile_cards.add(deck_tile.draw())
             player.tile_cards.remove(self.card_selected)
+            player.trap_visible.remove(returned_card)
+            self.activated_traps.remove(returned_card)
             player.status_played_tile = True
-            player.save()
-        else:
-            player = self.player_set.get(user=user)
-            self.move_player(cell, player)
-            player.remaining_moves = self.card_selected.number_of_moves-1
-
-           
-            player.status_played_action = True
             player.save()
 
         if player.remaining_moves == 0 :
@@ -565,6 +616,19 @@ class Game(models.Model):
 
     def move_player(self, cell_maze, player):
         player.pawn_cell = cell_maze
+        if cell_maze.card and cell_maze.card.trap :
+            for player_elem in self.player_set.all():
+                if cell_maze.card not in player_elem.trap_visible.all():
+                    player_elem.trap_visible.add(cell_maze.card)
+            if cell_maze.card.trap == 'move':
+                player.remaining_moves+=1
+            if cell_maze.card.trap == 'unmove':
+                player.remaining_moves -=1
+            if cell_maze.card.trap == 'rotate':
+                if cell_maze.card in self.activated_traps.all():
+                    self.activated_traps.remove(cell_maze.card)
+                else:
+                    self.activated_traps.add(cell_maze.card)
         player.save()
         
     def move_cards(self, cell_border):
