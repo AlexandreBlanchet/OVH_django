@@ -1,7 +1,7 @@
 const game_id = JSON.parse(document.getElementById('game_id').textContent);
 
 const chatSocket = new WebSocket(
-    'wss://'
+    'ws://'
     + window.location.host
     + '/ws/castlemaze/game/'
     + game_id

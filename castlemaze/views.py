@@ -47,8 +47,13 @@ def action_request(request):
         if cell.cell_type == 'game_status':
             game.start_game()
             game.send_board_to_all()
-        if cell.cell_type == 'player_hand':
-            card = Player.objects.get(game=game, user=request.user).cards.all()[cell.x]
+        if cell.cell_type == 'player_tile_hand':
+            card = Player.objects.get(game=game, user=request.user).tile_cards.all()[cell.x]
+            game.card_selected = card
+            game.save()
+            game.send_board_to_user(request.user)
+        if cell.cell_type == 'player_action_hand':
+            card = Player.objects.get(game=game, user=request.user).action_cards.all()[cell.x]
             game.card_selected = card
             game.save()
             game.send_board_to_user(request.user)
