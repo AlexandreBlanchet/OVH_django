@@ -23,6 +23,7 @@ CELL_TYPES = {
     'blue_team' : {'offset_top': 10, 'offset_left': 1260, 'width': 250, 'height': 350, 'class': 'castlemaze-team-blue' },
     'deck' : {'offset_top': 160, 'offset_left': 870, 'width': 100, 'height': 150, 'class': 'castlemaze-card' },
     'game_status' : {'offset_top': 230, 'offset_left': 1000, 'width': 300, 'height': 150, 'class': 'castlemaze-game-status' },
+    'pass_button' : {'offset_top': 550, 'offset_left': 680, 'width': 300, 'height': 150, 'class': 'castlemaze-game-pass-button' },
 
 }
 
@@ -111,6 +112,7 @@ class Player(models.Model):
     team = models.CharField(max_length=50)
     status_played_tile = models.BooleanField(default=False)
     status_played_action = models.BooleanField(default=False)
+    remaining_moves = models.IntegerField(default=0)
 
 class Game(models.Model):
     name = models.CharField(max_length=100)
@@ -122,9 +124,19 @@ class Game(models.Model):
     player_turn = models.IntegerField(default=0)
     last_cell_played = models.ForeignKey('Cell', related_name='last_cell_player', on_delete=models.CASCADE, null = True)
 
+
+    def force_next_player(self):
+        self.player_turn = (self.player_turn + 1) % self.player_set.count() 
+        self.save()
+        player = self.player_set.all()[self.player_turn]
+        player.status_played_tile = False
+        player.status_played_action = False
+        player.save()
+
+
     def set_next_player(self):
         player = self.player_set.all()[self.player_turn]
-        if player.status_played_tile and player.status_played_action:
+        if player.status_played_tile and player.status_played_action and player.remaining_moves == 0:
             self.player_turn = (self.player_turn + 1) % self.player_set.count() 
             self.save()
             player = self.player_set.all()[self.player_turn]
@@ -217,7 +229,9 @@ class Game(models.Model):
             list_status.append({'elem_id': 100, 'elem_text': '', 'left': cell_red_team.get_left_offset(), 'top': cell_red_team.get_top_offset()+150, 'display': '', 'class': 'castlemaze-text'})
             list_status.append({'elem_id': 102, 'elem_text': '', 'left': cell_blue_team.get_left_offset(), 'top': cell_blue_team.get_top_offset()+150, 'display': '', 'class': 'castlemaze-text'})
             list_status.append({'elem_id': 104, 'elem_text': "It's " + self.player_set.all()[self.player_turn].user.username + ' turn !', 'left': cell_status.get_left_offset()+80, 'top': cell_status.get_top_offset()+20, 'display': '', 'class': 'castlemaze-text'})
-      
+            cell_pass = self.cell_set.get(cell_type='pass_button')
+            list_status.append({'elem_id': 106, 'elem_text': 'Pass', 'left': cell_pass.get_left_offset(), 'top': cell_pass.get_top_offset()+20, 'display': '', 'class': 'castlemaze-text'})
+
         if self.status == 'B':
             list_status.append({'elem_id': 104, 'elem_text': 'Blue team won !', 'left': cell_status.get_left_offset()+80, 'top': cell_status.get_top_offset()+20, 'display': '', 'class': 'castlemaze-text'})
         if self.status == 'R':
@@ -261,7 +275,7 @@ class Game(models.Model):
         for cell in self.cell_set.filter(cell_type='maze'):
             if cell not in players_cell:
                 maze[cell.y][cell.x] = cell
-        return self.get_available_neighbours(maze, player_cell, self.card_selected.number_of_moves, [])
+        return self.get_available_neighbours(maze, player_cell, 1, [])
 
 
     def get_cells(self):
@@ -305,6 +319,10 @@ class Game(models.Model):
             click_class = ''
             player = self.player_set.all()[self.player_turn]
             if player.user == user and self.status == 'S':
+                if cell.cell_type == 'pass_button':
+                    clickable = True
+                    click_class = ' clickable'
+
                 if cell.cell_type == 'player_tile_hand' and player.status_played_tile == False :
                     clickable = True
                     click_class = ' clickable'
@@ -313,8 +331,8 @@ class Game(models.Model):
                 if cell.cell_type == 'player_action_hand' and player.status_played_action == False :
                     clickable = True
                     click_class = ' clickable'
-                    if self.card_selected == player.action_cards.all()[cell.x]:
-                        click_class = ' selected'
+                if cell.cell_type == 'player_action_hand'  and self.card_selected == player.action_cards.all()[cell.x]:
+                    click_class = ' selected'
 
                 if (cell.x, cell.y) not in border_cells_to_avoid and self.card_selected and self.card_selected.card_type == 'tile'and cell.cell_type == 'maze' and (cell.x == 0 or cell.x == BOARD_WIDTH - 1 or cell.y == 0 or cell.y == BOARD_HEIGTH - 1):
                     clickable = True
@@ -326,6 +344,7 @@ class Game(models.Model):
                 if (cell.x, cell.y) in NOT_CLICKABLE_COORD and cell.cell_type == 'maze' :
                     clickable = False
                     click_class = ''
+
 
 
             if self.status == 'P' and ((cell.cell_type == 'game_status' and self.player_set.all()[0].user == user) or cell.cell_type == 'blue_team' or cell.cell_type == 'red_team'):
@@ -380,16 +399,16 @@ class Game(models.Model):
             if red_player.user == user:
                 continue
             for card in red_player.tile_cards.all():
-                list_cards.append({'card_id': card.pk, 'left': cell_red_team.get_left_offset()+70, 'top': cell_red_team.get_top_offset()+140, 'display': 'img/card_back.png',  'class': 'castlemaze-maze'})
+                list_cards.append({'card_id': card.pk, 'left': cell_red_team.get_left_offset()+100, 'top': cell_red_team.get_top_offset()+100, 'display': 'img/card_back.png',  'class': 'castlemaze-maze'})
             for card in red_player.action_cards.all():
-                list_cards.append({'card_id': card.pk, 'left': cell_red_team.get_left_offset()+70, 'top': cell_red_team.get_top_offset()+140, 'display': 'img/card_back.png',  'class': 'castlemaze-maze'})
+                list_cards.append({'card_id': card.pk, 'left': cell_red_team.get_left_offset()+100, 'top': cell_red_team.get_top_offset()+100, 'display': 'img/card_back.png',  'class': 'castlemaze-maze'})
         for blue_player in self.player_set.filter(team='blue_team'):
             if blue_player.user == user:
                 continue
             for card in blue_player.tile_cards.all():
-                list_cards.append({'card_id': card.pk, 'left': cell_blue_team.get_left_offset()+70, 'top': cell_blue_team.get_top_offset()+140, 'display': 'img/card_back.png',  'class': 'castlemaze-maze'})
+                list_cards.append({'card_id': card.pk, 'left': cell_blue_team.get_left_offset()+100, 'top': cell_blue_team.get_top_offset()+100, 'display': 'img/card_back.png',  'class': 'castlemaze-maze'})
             for card in blue_player.action_cards.all():
-                list_cards.append({'card_id': card.pk, 'left': cell_blue_team.get_left_offset()+70, 'top': cell_blue_team.get_top_offset()+140, 'display': 'img/card_back.png',  'class': 'castlemaze-maze'})
+                list_cards.append({'card_id': card.pk, 'left': cell_blue_team.get_left_offset()+100, 'top': cell_blue_team.get_top_offset()+100, 'display': 'img/card_back.png',  'class': 'castlemaze-maze'})
 
         return list_cards
 
@@ -446,6 +465,8 @@ class Game(models.Model):
         cell.save()
         cell_game_status = Cell(x=0,y=0, game=self, cell_type='game_status')
         cell_game_status.save()
+        cell_pass = Cell(x=0, y=0, game=self, cell_type='pass_button')
+        cell_pass.save()
 
     def draw_cards_to_players(self):
         for _ in range(NUMBER_OF_CARDS_PER_PLAYER//2):
@@ -492,8 +513,13 @@ class Game(models.Model):
         if not self.card_selected and self.card_selected not in self.player_set.get(user=user).action_cards.all() \
         and self.card_selected not in self.player_set.get(user=user).tile_cards.all():
             return
+        player = self.player_set.get(user=user)
+        if self.card_selected.card_type == 'action' and player.remaining_moves > 0:
+            self.move_player(cell, player)
+            player.remaining_moves -= 1
+            player.save()
         
-        if self.card_selected.card_type == 'tile':
+        elif self.card_selected.card_type == 'tile':
             returned_card = self.move_cards(cell)
             deck_tile = self.deck_set.get(deck_type='tile')
             deck_tile.add_card(returned_card)
@@ -503,18 +529,25 @@ class Game(models.Model):
             player.status_played_tile = True
             player.save()
         else:
-            self.move_player(cell, player)
-            deck_action = self.deck_set.get(deck_type='action')
-            deck_action.add_card(self.card_selected)
             player = self.player_set.get(user=user)
-            player.action_cards.add(deck_action.draw())
-            player.action_cards.remove(self.card_selected)
+            self.move_player(cell, player)
+            player.remaining_moves = self.card_selected.number_of_moves-1
+
+           
             player.status_played_action = True
             player.save()
 
-
-        
-        self.card_selected = None
+        if player.remaining_moves == 0 :
+            if self.card_selected.card_type == 'action':
+                deck_action = self.deck_set.get(deck_type='action')
+                deck_action.add_card(self.card_selected)
+                
+                player.action_cards.add(deck_action.draw())
+                player.action_cards.remove(self.card_selected)
+                player.save()
+            
+            self.card_selected = None
+            
         # we only want to check if it's a border cell
         if cell.x == 0 or cell.x == BOARD_WIDTH - 1 or cell.y == 0 or cell.y == BOARD_HEIGTH - 1:
             self.last_cell_played = cell

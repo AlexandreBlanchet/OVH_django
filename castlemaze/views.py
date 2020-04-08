@@ -61,4 +61,8 @@ def action_request(request):
             game.action(cell,request.user)
             game.set_next_player()
             game.send_board_to_all()
+        if cell.cell_type == 'pass_button':
+            game.action(cell,request.user)
+            game.force_next_player()
+            game.send_board_to_all()
         return HttpResponse("Ok")
