@@ -23,7 +23,7 @@ CELL_TYPES = {
     'blue_team' : {'offset_top': 10, 'offset_left': 1260, 'width': 250, 'height': 350, 'class': 'castlemaze-team-blue' },
     'deck' : {'offset_top': 160, 'offset_left': 870, 'width': 100, 'height': 150, 'class': 'castlemaze-card' },
     'game_status' : {'offset_top': 230, 'offset_left': 1000, 'width': 300, 'height': 150, 'class': 'castlemaze-game-status' },
-    'pass_button' : {'offset_top': 550, 'offset_left': 680, 'width': 300, 'height': 150, 'class': 'castlemaze-game-pass-button' },
+    'pass_button' : {'offset_top': 570, 'offset_left': 690, 'width': 300, 'height': 150, 'class': 'castlemaze-game-pass-button' },
 
 }
 
@@ -138,28 +138,34 @@ class Game(models.Model):
     card_selected = models.ForeignKey(Card, on_delete=models.CASCADE, null=True)
     max_number_of_players = models.IntegerField(default=6)
     player_turn = models.IntegerField(default=0)
+    team_turn = models.CharField(max_length=100, default='red_team')
     last_cell_played = models.ForeignKey('Cell', related_name='last_cell_player', on_delete=models.CASCADE, null = True)
     activated_traps = models.ManyToManyField(Card, related_name='activated_traps')
 
 
+    def get_playing_player(self):
+        team_players = self.player_set.filter(team=self.team_turn)
+        player_id = self.player_turn % team_players.count()
+        return self.player_set.get(player_id=player_id, team=self.team_turn)
+
     def force_next_player(self):
-        self.player_turn = (self.player_turn + 1) % self.player_set.count() 
+        if self.team_turn == 'blue_team':
+            self.player_turn = (self.player_turn + 1) % 4
+            self.team_turn = 'red_team'
+        else :
+            self.team_turn = 'blue_team'
         self.save()
-        player = self.player_set.all()[self.player_turn]
+        
+        player = self.get_playing_player()
         player.status_played_tile = False
         player.status_played_action = False
         player.save()
 
 
     def set_next_player(self):
-        player = self.player_set.all()[self.player_turn]
-        if player.status_played_tile and player.status_played_action and player.remaining_moves == 0:
-            self.player_turn = (self.player_turn + 1) % self.player_set.count() 
-            self.save()
-            player = self.player_set.all()[self.player_turn]
-            player.status_played_tile = False
-            player.status_played_action = False
-            player.save()
+        player = self.get_playing_player()
+        if player.status_played_tile and player.status_played_action and player.remaining_moves <= 0:
+            self.force_next_player()
 
     def add_player_to_team(self, user, team):
 
@@ -170,16 +176,13 @@ class Game(models.Model):
             if player.team == team:
                 send_update_to_players(self.pk, 'all', '', {'game_status': [{'elem_id': player.pk, 'elem_text': '', 'left': 0, 'top': 0, 'class': ''}]})
                 
-                player_team = player.team
-                
                 player.delete()
-                i=0
-                for player in self.player_set.filter(team=player_team):
-                    player.player_id = i
-                    player.save()
-                    i+=1
+
                 return
-        player.player_id = self.player_set.filter(team=team).count()
+        i = 0
+        while i < 4 and self.player_set.filter(team=team, player_id=i):
+            i += 1
+        player.player_id = i
         player.game = self
         player.team = team
         player.save()
@@ -245,7 +248,7 @@ class Game(models.Model):
         if self.status == 'S':
             list_status.append({'elem_id': 100, 'elem_text': '', 'left': cell_red_team.get_left_offset(), 'top': cell_red_team.get_top_offset()+150, 'display': '', 'class': 'castlemaze-text'})
             list_status.append({'elem_id': 102, 'elem_text': '', 'left': cell_blue_team.get_left_offset(), 'top': cell_blue_team.get_top_offset()+150, 'display': '', 'class': 'castlemaze-text'})
-            list_status.append({'elem_id': 104, 'elem_text': "It's " + self.player_set.all()[self.player_turn].user.username + ' turn !', 'left': cell_status.get_left_offset()+80, 'top': cell_status.get_top_offset()+20, 'display': '', 'class': 'castlemaze-text'})
+            list_status.append({'elem_id': 104, 'elem_text': "It's " + self.get_playing_player().user.username + ' turn !', 'left': cell_status.get_left_offset()+80, 'top': cell_status.get_top_offset()+20, 'display': '', 'class': 'castlemaze-text'})
             cell_pass = self.cell_set.get(cell_type='pass_button')
             list_status.append({'elem_id': 106, 'elem_text': 'Pass', 'left': cell_pass.get_left_offset(), 'top': cell_pass.get_top_offset()+20, 'display': '', 'class': 'castlemaze-text'})
 
@@ -361,7 +364,7 @@ class Game(models.Model):
         for cell in self.cell_set.all() :
             clickable = False
             click_class = ''
-            player = self.player_set.all()[self.player_turn]
+            player = self.get_playing_player()
             if player.user == user and self.status == 'S':
                 if cell.cell_type == 'pass_button':
                     clickable = True
@@ -525,7 +528,8 @@ class Game(models.Model):
                 card = self.deck_set.get(deck_type='tile').draw()
                 if card:
                     player.tile_cards.add(card)
-                    player.trap_visible.add(card)
+                    for team_player in self.player_set.filter(team=player.team):
+                        team_player.trap_visible.add(card)
         for _ in range(NUMBER_OF_CARDS_PER_PLAYER//2):
             for player in self.player_set.all():
                 card = self.deck_set.get(deck_type='action').draw()
@@ -538,6 +542,7 @@ class Game(models.Model):
             return
         self.status='S'
         self.save()
+
         for cell in self.cell_set.filter(cell_type='maze'):
             if cell.x == 0 or cell.x == BOARD_WIDTH - 1 or cell.y == 0 or cell.y == BOARD_HEIGTH - 1 or (cell.x,cell.y) in CASTLE_COORD :
                 continue
@@ -562,8 +567,8 @@ class Game(models.Model):
 
     def action(self, cell, user):
         # TODO verifie if that's the correct user who does the action
-        if not self.card_selected and self.card_selected not in self.player_set.get(user=user).action_cards.all() \
-        and self.card_selected not in self.player_set.get(user=user).tile_cards.all():
+        if cell.cell_type != 'maze' or ( not self.card_selected and self.card_selected not in self.player_set.get(user=user).action_cards.all() \
+        and self.card_selected not in self.player_set.get(user=user).tile_cards.all()):
             return
         player = self.player_set.get(user=user)
         if self.card_selected.card_type == 'action' and not player.status_played_action:
@@ -576,19 +581,26 @@ class Game(models.Model):
             player.remaining_moves -= 1
             player.save()
         
-        elif self.card_selected.card_type == 'tile':
+        elif self.card_selected.card_type == 'tile' and cell.cell_type == 'maze':
             returned_card = self.move_cards(cell)
             deck_tile = self.deck_set.get(deck_type='tile')
             deck_tile.add_card(returned_card)
             player = self.player_set.get(user=user)
-            player.tile_cards.add(deck_tile.draw())
+            player.remaining_moves = 0
+            new_card = deck_tile.draw()
+            player.tile_cards.add(new_card)
+            for team_player in self.player_set.filter(team=player.team):
+                team_player.trap_visible.add(new_card)
+
+
             player.tile_cards.remove(self.card_selected)
-            player.trap_visible.remove(returned_card)
+            for player_p in self.player_set.all():
+                player_p.trap_visible.remove(returned_card)
             self.activated_traps.remove(returned_card)
             player.status_played_tile = True
             player.save()
 
-        if player.remaining_moves == 0 :
+        if player.remaining_moves <= 0 :
             if self.card_selected.card_type == 'action':
                 deck_action = self.deck_set.get(deck_type='action')
                 deck_action.add_card(self.card_selected)
@@ -629,6 +641,10 @@ class Game(models.Model):
                     self.activated_traps.remove(cell_maze.card)
                 else:
                     self.activated_traps.add(cell_maze.card)
+            if cell_maze.card.trap == 'open':
+                self.activated_traps.add(cell_maze.card)
+            if cell_maze.card.trap == 'close':
+                self.activated_traps.add(cell_maze.card)
         player.save()
         
     def move_cards(self, cell_border):

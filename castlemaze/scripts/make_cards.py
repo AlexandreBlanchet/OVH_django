@@ -19,7 +19,7 @@ for _ in range(1):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(100):
+for _ in range(1):
     card = Card()
     card.img = 'shape_1'
     card.card_type = 'tile'
@@ -60,7 +60,7 @@ for _ in range(1):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(100):
+for _ in range(1):
     card = Card()
     card.img = 'shape_1_2'
     card.card_type = 'tile'
@@ -99,6 +99,38 @@ for _ in range(12):
     card.number_of_moves = 0
     card.save()
 
+for _ in range(1):
+    card = Card()
+    card.img = 'shape_2'
+    card.card_type = 'tile'
+    card.trap = 'open'
+    card.open_top = True
+    card.open_left = False
+    card.open_bottom = True
+    card.open_right = True
+    card.activated_open_top = True
+    card.activated_open_left = True
+    card.activated_open_bottom = True
+    card.activated_open_right = True
+    card.number_of_moves = 0
+    card.save()
+
+for _ in range(1):
+    card = Card()
+    card.img = 'shape_2'
+    card.card_type = 'tile'
+    card.trap = 'close'
+    card.open_top = True
+    card.open_left = False
+    card.open_bottom = True
+    card.open_right = True
+    card.activated_open_top = True
+    card.activated_open_left = False
+    card.activated_open_bottom = True
+    card.activated_open_right = False
+    card.number_of_moves = 0
+    card.save()
+
 
 for _ in range(12):
     card = Card()
@@ -108,6 +140,38 @@ for _ in range(12):
     card.open_left = True
     card.open_bottom = True
     card.open_right = True
+    card.number_of_moves = 0
+    card.save()
+
+for _ in range(1):
+    card = Card()
+    card.img = 'shape_2_2'
+    card.card_type = 'tile'
+    card.trap = 'open'
+    card.open_top = False
+    card.open_left = True
+    card.open_bottom = True
+    card.open_right = True
+    card.activated_open_top = True
+    card.activated_open_left = True
+    card.activated_open_bottom = True
+    card.activated_open_right = True
+    card.number_of_moves = 0
+    card.save()
+
+for _ in range(1):
+    card = Card()
+    card.img = 'shape_2_2'
+    card.card_type = 'tile'
+    card.trap = 'close'
+    card.open_top = False
+    card.open_left = True
+    card.open_bottom = True
+    card.open_right = True
+    card.activated_open_top = False
+    card.activated_open_left = True
+    card.activated_open_bottom = False
+    card.activated_open_right = True
     card.number_of_moves = 0
     card.save()
 
@@ -123,6 +187,38 @@ for _ in range(12):
     card.number_of_moves = 0
     card.save()
 
+for _ in range(1):
+    card = Card()
+    card.img = 'shape_2_3'
+    card.card_type = 'tile'
+    card.trap = 'open'
+    card.open_top = True
+    card.open_left = True
+    card.open_bottom = True
+    card.open_right = False
+    card.activated_open_top = True
+    card.activated_open_left = True
+    card.activated_open_bottom = True
+    card.activated_open_right = True
+    card.number_of_moves = 0
+    card.save()
+
+for _ in range(1):
+    card = Card()
+    card.img = 'shape_2_3'
+    card.card_type = 'tile'
+    card.trap = 'close'
+    card.open_top = True
+    card.open_left = True
+    card.open_bottom = True
+    card.open_right = False
+    card.activated_open_top = True
+    card.activated_open_left = False
+    card.activated_open_bottom = True
+    card.activated_open_right = False
+    card.number_of_moves = 0
+    card.save()
+
 
 for _ in range(12):
     card = Card()
@@ -135,6 +231,37 @@ for _ in range(12):
     card.number_of_moves = 0
     card.save()
 
+for _ in range(1):
+    card = Card()
+    card.img = 'shape_2_4'
+    card.card_type = 'tile'
+    card.trap = 'open'
+    card.open_top = True
+    card.open_left = True
+    card.open_bottom = False
+    card.open_right = True
+    card.activated_open_top = True
+    card.activated_open_left = True
+    card.activated_open_bottom = True
+    card.activated_open_right = True
+    card.number_of_moves = 0
+    card.save()
+
+for _ in range(1):
+    card = Card()
+    card.img = 'shape_2_4'
+    card.card_type = 'tile'
+    card.trap = 'close'
+    card.open_top = True
+    card.open_left = True
+    card.open_bottom = False
+    card.open_right = True
+    card.activated_open_top = False
+    card.activated_open_left = True
+    card.activated_open_bottom = False
+    card.activated_open_right = True
+    card.number_of_moves = 0
+    card.save()
 
 for _ in range(50):
     card = Card()
@@ -147,6 +274,29 @@ for _ in range(50):
     card.number_of_moves = 0
     card.save()
 
+for _ in range(5):
+    card = Card()
+    card.img = 'shape_3'
+    card.card_type = 'tile'
+    card.trap = 'move'
+    card.open_top = True
+    card.open_left = True
+    card.open_bottom = True
+    card.open_right = True
+    card.number_of_moves = 0
+    card.save()
+
+for _ in range(500):
+    card = Card()
+    card.img = 'shape_3'
+    card.card_type = 'tile'
+    card.trap = 'unmove'
+    card.open_top = True
+    card.open_left = True
+    card.open_bottom = True
+    card.open_right = True
+    card.number_of_moves = 0
+    card.save()
 
 for _ in range(10):
     card = Card()
