@@ -40,13 +40,10 @@ NOT_CLICKABLE_COORD = (
     (BOARD_WIDTH-1,4),
     (3,0),
     (3,BOARD_HEIGTH-1),
-    (10,0),
-    (10,BOARD_HEIGTH-1),
 )
 
 CASTLE_COORD = (
     (3,4),
-    (10,4),
 )
 
 logger = logging.getLogger(__name__)
@@ -141,6 +138,7 @@ class Game(models.Model):
     team_turn = models.CharField(max_length=100, default='red_team')
     last_cell_played = models.ForeignKey('Cell', related_name='last_cell_player', on_delete=models.CASCADE, null = True)
     activated_traps = models.ManyToManyField(Card, related_name='activated_traps')
+    number_of_round_left = models.IntegerField(default=20)
 
 
     def get_playing_player(self):
@@ -152,6 +150,11 @@ class Game(models.Model):
         if self.team_turn == 'blue_team':
             self.player_turn = (self.player_turn + 1) % 4
             self.team_turn = 'red_team'
+            if self.player_turn % max(self.player_set.filter(team='red_team').count(), self.player_set.filter(team='blue_team').count()) == 0:
+                self.number_of_round_left -= 1
+                if self.number_of_round_left == 0:
+                    self.status = 'R'
+
         else :
             self.team_turn = 'blue_team'
         self.save()
@@ -249,6 +252,7 @@ class Game(models.Model):
             list_status.append({'elem_id': 100, 'elem_text': '', 'left': cell_red_team.get_left_offset(), 'top': cell_red_team.get_top_offset()+150, 'display': '', 'class': 'castlemaze-text'})
             list_status.append({'elem_id': 102, 'elem_text': '', 'left': cell_blue_team.get_left_offset(), 'top': cell_blue_team.get_top_offset()+150, 'display': '', 'class': 'castlemaze-text'})
             list_status.append({'elem_id': 104, 'elem_text': "It's " + self.get_playing_player().user.username + ' turn !', 'left': cell_status.get_left_offset()+80, 'top': cell_status.get_top_offset()+20, 'display': '', 'class': 'castlemaze-text'})
+            list_status.append({'elem_id': 108, 'elem_text': f'Rounds left {self.number_of_round_left} !', 'left': 300, 'top': 5, 'display': '', 'class': 'castlemaze-text'})
             cell_pass = self.cell_set.get(cell_type='pass_button')
             list_status.append({'elem_id': 106, 'elem_text': 'Pass', 'left': cell_pass.get_left_offset(), 'top': cell_pass.get_top_offset()+20, 'display': '', 'class': 'castlemaze-text'})
 
@@ -256,7 +260,8 @@ class Game(models.Model):
             list_status.append({'elem_id': 104, 'elem_text': 'Blue team won !', 'left': cell_status.get_left_offset()+80, 'top': cell_status.get_top_offset()+20, 'display': '', 'class': 'castlemaze-text'})
         if self.status == 'R':
             list_status.append({'elem_id': 104, 'elem_text': 'Red team won !', 'left': cell_status.get_left_offset()+80, 'top': cell_status.get_top_offset()+20, 'display': '', 'class': 'castlemaze-text'})
-        
+            list_status.append({'elem_id': 108, 'elem_text': f'Rounds left {self.number_of_round_left} !', 'left': 300, 'top': 5, 'display': '', 'class': 'castlemaze-text'})
+           
         
         return list_status
 
@@ -498,11 +503,8 @@ class Game(models.Model):
         for i in range(BOARD_WIDTH):
             for j in range(BOARD_HEIGTH):
                 cell = Cell(x=i,y=j, game=self)
-
                 if cell.x == 3 and cell.y == 4:
                     cell.card = dict_castle_cards['castle_left']
-                if cell.x == 10 and cell.y == 4:
-                    cell.card = dict_castle_cards['castle_right']
 
                 cell.save()
         for i in range(NUMBER_OF_CARDS_PER_PLAYER//2):
@@ -614,12 +616,7 @@ class Game(models.Model):
         # we only want to check if it's a border cell
         if cell.x == 0 or cell.x == BOARD_WIDTH - 1 or cell.y == 0 or cell.y == BOARD_HEIGTH - 1:
             self.last_cell_played = cell
-        blue_crown_cell = self.cell_set.get(cell_type='maze', x=10, y=4)
         red_crown_cell = self.cell_set.get(cell_type='maze', x=3, y=4)
-        for red_player in self.player_set.filter(team='red_team'):
-            if red_player.pawn_cell == blue_crown_cell:
-                self.status='R'
-
         for blue_player in self.player_set.filter(team='blue_team'):
             if blue_player.pawn_cell == red_crown_cell:
                 self.status='B'

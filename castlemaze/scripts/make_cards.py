@@ -19,7 +19,7 @@ for _ in range(30):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(5):
+for _ in range(7):
     card = Card()
     card.img = 'shape_1'
     card.card_type = 'tile'
@@ -60,7 +60,7 @@ for _ in range(30):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(5):
+for _ in range(7):
     card = Card()
     card.img = 'shape_1_2'
     card.card_type = 'tile'
@@ -99,7 +99,7 @@ for _ in range(15):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(3):
+for _ in range(4):
     card = Card()
     card.img = 'shape_2'
     card.card_type = 'tile'
@@ -115,7 +115,7 @@ for _ in range(3):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(3):
+for _ in range(4):
     card = Card()
     card.img = 'shape_2'
     card.card_type = 'tile'
@@ -143,7 +143,7 @@ for _ in range(15):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(3):
+for _ in range(4):
     card = Card()
     card.img = 'shape_2_2'
     card.card_type = 'tile'
@@ -159,7 +159,7 @@ for _ in range(3):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(3):
+for _ in range(4):
     card = Card()
     card.img = 'shape_2_2'
     card.card_type = 'tile'
@@ -187,7 +187,7 @@ for _ in range(15):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(2):
+for _ in range(4):
     card = Card()
     card.img = 'shape_2_3'
     card.card_type = 'tile'
@@ -203,7 +203,7 @@ for _ in range(2):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(2):
+for _ in range(4):
     card = Card()
     card.img = 'shape_2_3'
     card.card_type = 'tile'
@@ -231,7 +231,7 @@ for _ in range(15):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(2):
+for _ in range(4):
     card = Card()
     card.img = 'shape_2_4'
     card.card_type = 'tile'
@@ -247,7 +247,7 @@ for _ in range(2):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(2):
+for _ in range(4):
     card = Card()
     card.img = 'shape_2_4'
     card.card_type = 'tile'
@@ -263,7 +263,7 @@ for _ in range(2):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(60):
+for _ in range(50):
     card = Card()
     card.img = 'shape_3'
     card.card_type = 'tile'
@@ -298,7 +298,7 @@ for _ in range(10):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(10):
+for _ in range(15):
     card = Card()
     card.img = 'shape_3'
     card.card_type = 'tile'
@@ -314,7 +314,7 @@ for _ in range(10):
     card.number_of_moves = 0
     card.save()
 
-for _ in range(15):
+for _ in range(13):
     card = Card()
     card.img = 'shape_4'
     card.card_type = 'tile'
@@ -326,7 +326,7 @@ for _ in range(15):
     card.save()
 
 
-for _ in range(15):
+for _ in range(13):
     card = Card()
     card.img = 'shape_4_2'
     card.card_type = 'tile'
@@ -338,7 +338,7 @@ for _ in range(15):
     card.save()
 
 
-for _ in range(15):
+for _ in range(13):
     card = Card()
     card.img = 'shape_4_3'
     card.card_type = 'tile'
@@ -350,7 +350,7 @@ for _ in range(15):
     card.save()
 
 
-for _ in range(15):
+for _ in range(13):
     card = Card()
     card.img = 'shape_4_4'
     card.card_type = 'tile'
@@ -363,7 +363,7 @@ for _ in range(15):
 
 # Action cards
 
-for _ in range(40):
+for _ in range(30):
     card = Card()
     card.img = 'action_1'
     card.card_type = 'action'
@@ -375,7 +375,7 @@ for _ in range(40):
     card.save()
 
 
-for _ in range(40):
+for _ in range(50):
     card = Card()
     card.img = 'action_2'
     card.card_type = 'action'
@@ -403,9 +403,9 @@ for _ in range(30):
 card = Card()
 card.img = 'castle_left'
 card.card_type = 'castle'
-card.open_top = False
+card.open_top = True
 card.open_left = True
-card.open_bottom = False
+card.open_bottom = True
 card.open_right = False
 card.number_of_moves = 0
 card.save()
