@@ -627,7 +627,7 @@ class Game(models.Model):
 
 
     def move_player(self, cell_maze, player):
-        player.pawn_cell = cell_maze
+        
         if cell_maze.card and cell_maze.card.trap :
             for player_elem in self.player_set.all():
                 if cell_maze.card not in player_elem.trap_visible.all():
@@ -645,6 +645,13 @@ class Game(models.Model):
                 self.activated_traps.add(cell_maze.card)
             if cell_maze.card.trap == 'close':
                 self.activated_traps.add(cell_maze.card)
+            if cell_maze.card.trap == 'bombe':
+                self.activated_traps.add(cell_maze.card)
+                player.status_played_tile = True
+                player.remaining_moves = 0
+                player.save()
+                return
+        player.pawn_cell = cell_maze
         player.save()
         
     def move_cards(self, cell_border):
